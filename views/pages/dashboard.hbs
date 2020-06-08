@@ -93,11 +93,20 @@
             <div class="card h-100">
                 <div class="card-header bg-primary shadow-sm p-2 border-0">
                     <div class="btn-group" data-toggle="buttons">
+
+                        <!-- Toggle Between map and table -->
                         <a id="selectMap" class="searchBtn btn btn-primary active text-white">Map</a>
                         <a id="selectTable" class="searchBtn btn btn-primary text-white">Table</a>
+
                     </div>
                 </div>
                 <div id="locations" class="card-body p-0">
+
+                    <!--
+                        A Map of all the locations
+                        TODO - Populate with data
+                        TODO - click on a feature on the map to update the dashboard
+                    -->
                     <div id="map">
                         <div id="searchLocations" class="input-group">
                             <div id="geocoder"></div>
@@ -112,6 +121,12 @@
                             </div>
                         </div>
                     </div>
+
+                    <!--
+                        A Map of all the locations
+                        TODO - Populate with data
+                        TODO - Add a column to the with a button -> click to update the dashboard
+                    -->
                     <div id="table" class="p-2">
                         <!-- Results Table -->
                         <table id="dataTable" class="display table" width="100%"></table>
@@ -127,6 +142,7 @@
                     <h4 class=" mb-0 text-white">Filters</h4>
                 </div>
                 <div class="card-body">
+
                     <!--Filter Year-->
                     <label class="formLabel text-muted">Year</label>
                     <select id="selectYear" class="custom-select mb-2">
@@ -191,27 +207,35 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
+                        <!--
+                            Street view of the location for selected feature/point
+                            TODO - Update on map/table click
+                            TODO - Toggle between different directions N/S/E/W
+                        -->
                         <div class="col-12 col-lg-6 col-xl-12 mb-2">
                             <img src="https://maps.googleapis.com/maps/api/streetview?size=600x300&location=50.71844418222463,-3.46219539642334&fov=80&heading=0.883&pitch=0&key={{googleApiKey}}
                             " class="img-fluid" alt="">
                         </div>
                         <div class="col-12 col-lg-6 col-xl-12 mb-2">
                             <div class="row">
-                                <!-- Feature Details -->
+                                <!--
+                                    Feature Details
+                                    TODO - Update on map/table click
+                                -->
                                 <div class="col-12 ">
                                     <label class="formLabel text-muted">Count Point Id</label>
-                                    <p class="td_region_name mb-1">123456</p>
+                                    <p class="mb-1">123456</p>
                                 </div>
                                 <div class="col-12">
                                     <div class="row">
                                         <div class="col-6">
                                             <label class="formLabel text-muted">Region</label>
-                                            <p class="td_region_name mb-1">ABC</p>
+                                            <p class="mb-1">ABC</p>
                                         </div>
                                         <div class="col-6">
 
                                             <label class="formLabel text-muted">Local Authority</label>
-                                            <p class="td_local_authority_name  mb-1">ABC</p>
+                                            <p class="mb-1">ABC</p>
 
                                         </div>
                                     </div>
@@ -228,14 +252,14 @@
                                         <div class="col-6">
 
                                             <label class="formLabel text-muted">Road Type</label>
-                                            <p class="td_road_type  mb-1">ABC</p>
+                                            <p class="mb-1">ABC</p>
 
                                         </div>
 
                                         <div class="col-6">
 
                                             <label class="formLabel text-muted">Road Category</label>
-                                            <p class="td_road_category  mb-1">ABC</p>
+                                            <p class="mb-1">ABC</p>
 
                                         </div>
                                     </div>
@@ -243,22 +267,27 @@
                                         <div class="col-6">
 
                                             <label class="formLabel text-muted">Latitude</label>
-                                            <p class="td_latitude mb-1">123</p>
+                                            <p class="mb-1">123</p>
 
                                         </div>
                                         <div class="col-6">
                                             <label class="formLabel text-muted">Longitude</label>
-                                            <p class="td_longitude mb-1">123</p>
+                                            <p class="mb-1">123</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
+
+        <!--
+            Chart of Non Commercial Vehicles for selected feature/point
+            TODO - Update on map/table click
+            TODO - Toggle between Total counts by direction & detailed breakdown
+        -->
 
         <div class="col-12 col-md-12 col-lg-6 col-xl-4 mb-3">
             <div class="card h-100">
@@ -271,6 +300,11 @@
             </div>
         </div>
 
+        <!--
+            Chart of HGVs for selected feature/point
+            TODO - Update on map/table click
+            TODO - Toggle between Total counts by direction & detailed breakdown
+        -->
         <div class="col-12 col-md-12 col-lg-6 col-xl-4 mb-3">
             <div class="card h-100">
                 <div class="card-header bg-primary">
@@ -282,6 +316,12 @@
             </div>
         </div>
 
+        <!--
+           Chart of Vehicles by year for selected feature/point
+           TODO - Update on map/table click
+           TODO - Toggle between Total counts [All Vehicles], [All Non Commercial Vehicles, HGVs, Pedal Cycles], individual categories by direction
+           TODO - Toggle between Total counts by direction & detailed breakdown
+       -->
         <div class="col-12 col-md-12 col-lg-6 col-xl-4 mb-3">
             <div class="card h-100">
                 <div class="card-header bg-primary">
@@ -371,6 +411,7 @@
             unit: 'metric'
         }), 'bottom-right');
 
+        // Add the Geocoder
         let geocoder = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken,
             placeholder: 'Search by Address',
@@ -380,6 +421,7 @@
 
         geocoder.addTo('#geocoder');
 
+        // Toggle table and Map
         $('#selectMap').click(function (e) {
             $('.searchBtn').removeClass('active');
             $('#map').show();

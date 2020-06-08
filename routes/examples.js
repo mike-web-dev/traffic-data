@@ -24,8 +24,9 @@ router.get('/', function (req, res, next) {
                 <p>
                     Click on a feature to view details and zoom to the location
                 </p>`,
-            gitUrl: '/'
+
         },
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/01_mapbox_layer.hbs',
         page: [{title: 'Examples', url: '/examples'}, {title: 'Load data from a Mapbox'}]
     });
 });
@@ -45,9 +46,9 @@ router.get('/geojson-layer', function (req, res, next) {
                 </p>
                 <p>
                     Click on a feature to view details and zoom to the location
-                </p>`,
-            gitUrl: '/'
+                </p>`
         },
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/02_geojson_layer.hbs',
         page: [{title: 'Examples', url: '/examples'}, {title: 'Load data from a GeoJson'}]
     });
 });
@@ -75,7 +76,7 @@ router.get('/d3-load', function (req, res, next) {
                 </p>`,
 
         },
-        gitUrl: '/',
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/03_load_using_d3.hbs',
         page: [{title: 'Examples', url: '/examples'}, {title: 'Load data using D3'}]
     });
 });
@@ -99,7 +100,7 @@ router.get('/d3-overlay', function (req, res, next) {
                 </p>`,
 
         },
-        gitUrl: '/',
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/04_d3_overlay.hbs',
         page: [{title: 'Examples', url: '/examples'}, {title: 'Using a D3 Overlay'}]
     });
 });
@@ -124,7 +125,7 @@ router.get('/search-by-location', function (req, res, next) {
                 </p>`,
 
         },
-        gitUrl: '/',
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/05_search_by_location.hbs',
         page: [{title: 'Examples', url: '/examples'}, {title: 'Search by Location'}]
     });
 });
@@ -148,7 +149,7 @@ router.get('/get-street-view', function (req, res, next) {
                     Click on a feature to view an image of the location
                 </p>`,
         },
-        gitUrl: '/',
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/06_google_street_view.hbs',
         page: [{title: 'Examples', url: '/examples'}, {title: 'Street View'}]
     });
 });
@@ -174,7 +175,7 @@ router.get('/style-by-attribute', function (req, res, next) {
                 </p>`,
 
         },
-        gitUrl: '/',
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/07_style_by_attribute.hbs',
         page: [{title: 'Examples', url: '/examples'}, {title: 'Style data by attribute'}]
     });
 });
@@ -193,7 +194,7 @@ router.get('/chart-types', function (req, res, next) {
                 </p>`,
 
         },
-        gitUrl: '/',
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/08_chart_types.hbs',
         page: [{title: 'Examples', url: '/examples'}, {title: 'Chart Types'}]
     });
 });

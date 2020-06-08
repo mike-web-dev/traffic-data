@@ -106,19 +106,19 @@
                 // features exist
                 if(e.features.length > 0){
                     // select closest/first feature
-                    let selected = e.features[0].properties.count_point_id;
+                    let selected = e.features[0];
 
                     // Style selected feature
                     map.setPaintProperty('points', 'circle-color', [
                         'match',
                         ['get', 'count_point_id'],
-                        selected,
+                        selected.properties.count_point_id,
                         '#fd7e14',
                         /* other */ '#008cba'
                     ]);
 
                     // Create a Coordinates pair
-                    let coordinates = e.features[0].geometry.coordinates.slice();
+                    let coordinates = selected.geometry.coordinates.slice();
 
                     // Ensure that if the map is zoomed out such that multiple
                     // copies of the feature are visible, the popup appears
@@ -134,28 +134,28 @@
                     let description = `
                     <div id="customPopupDetails" class="card border-light mb-3">
                         <div class="card-header bg-primary text-white border-0">
-                            Count Location ID - `+e.features[0].properties.count_point_id+`
+                            Count Location ID - `+selected.properties.count_point_id+`
                             <a type="button" class="close" onclick="closePopup()">×</a>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-6">
                                     <label class="text-muted">Region</label>
-                                    <p>`+e.features[0].properties.region_name+`</p>
+                                    <p>`+selected.properties.region_name+`</p>
                                 </div>
                                 <div class="col-6">
                                     <label class="text-muted">Local Authority</label>
-                                    <p>`+e.features[0].properties.local_authority_name+`</p>
+                                    <p>`+selected.properties.local_authority_name+`</p>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-6">
                                     <label class="text-muted">Road Name</label>
-                                    <p>`+e.features[0].properties.road_name+`</p>
+                                    <p>`+selected.properties.road_name+`</p>
                                 </div>
                                 <div class="col-6">
                                     <label class="text-muted">Road Type</label>
-                                    <p>`+e.features[0].properties.road_type+`</p>
+                                    <p>`+selected.properties.road_type+`</p>
                                 </div>
                             </div>
                         </div>

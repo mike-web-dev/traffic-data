@@ -17,7 +17,7 @@ router.get('/', function (req, res, next) {
                    time and the dashboard will need to wait for another day. 
                 </p>`,
         },
-        gitUrl: '/',
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/dashboard.hbs',
     });
 });
 
