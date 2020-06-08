@@ -1,0 +1,338 @@
+{{#section 'header'}}
+    <style>
+
+        .dataTables_filter {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+    </style>
+{{/section}}
+
+<div class="mapContainer">
+    <div id="map" class="map"></div>
+    {{> info}}
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white">
+                <!-- Modal Title -->
+                <h5 class="modal-title">
+                    Count Point ID -
+                    <span id="dataModalLabel"></span>
+                </h5>
+
+                <!-- Close Modal -->
+                <a type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </a>
+
+            </div>
+            <div id="dataModalBody" class="modal-body">
+
+                <!-- Results Table -->
+                <table id="dataTable" class="display table" width="100%"></table>
+
+            </div>
+            <div class="modal-footer">
+
+                <!-- Close Modal -->
+                <a type="button" class="btn btn-secondary" data-dismiss="modal">Close</a>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{{#section 'script'}}
+
+    <!-- D3.js -->
+    <script src="/js/d3/d3.v5.min.js"></script>
+
+    <!-- DataTables -->
+    <script type="text/javascript" src="/js/datatables/datatables.min.js"></script>
+
+    <script>
+
+        // Data Place holders
+        let selected = null; // selected feature
+        let data = null; // geojson
+
+        // Mapbox token
+        mapboxgl.accessToken = "{{mapboxToken}}";
+
+        // Create the Map
+        let map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+            center: [-3.70, 50.72], // starting position [lng, lat]
+            zoom: 8 // starting zoom
+        });
+
+        // Bounding Box (bbox) for Devon
+        let bbox = [
+            [-2.83, 51.25],
+            [-4.56, 50.18]
+        ];
+
+        // Set the map to the bbox
+        map.fitBounds(bbox, {
+            padding: 20 // Add some padding around bbox
+        });
+
+        // Add Navigation control
+        map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+        // Add Current Location control
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }), 'top-left');
+
+        // Add map Scale
+        map.addControl(new mapboxgl.ScaleControl({
+            maxWidth: 80,
+            unit: 'metric'
+        }), 'bottom-right');
+
+        // Create Popup
+        let popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            maxWidth: '350px'
+        });
+
+        // Close popup and reset selected feature & layer paint properties
+        function closePopup() {
+            popup.remove();
+            map.setPaintProperty('points', 'circle-color', '#008cba');
+            selected = null;
+        }
+
+        // Filter an array of objects when object with attribute = value
+        function filterDataByAttribute(array, attr, value) {
+            return array.filter(function (obj) {
+                if (typeof value === 'number') {
+                    return parseInt(obj[attr]) === value;
+                }
+                return obj[attr] === value;
+            });
+        }
+
+        // Filter the CSV to find data with associated count_point_id then display inside a datatable
+        function showFilteredData() {
+
+            if (selected && data) {
+
+                let countPointId = selected.properties.count_point_id
+
+                $('#dataModalLabel').html(countPointId);
+
+                // Filter the data to only include the selected count point
+                const filteredData = filterDataByAttribute(data, 'count_point_id', countPointId);
+
+                // Empty the table
+                table.clear();
+
+                // Add all selected to the table
+                table.rows.add(filteredData).draw();
+            }
+
+            // Show data inside a Modal
+            $('#dataModal').modal('show');
+        }
+
+        // Map is Loaded
+        map.on('load', function () {
+
+            // Count Point Locations filtered and converted using QGIS
+            let locations = d3.json("/data/locations.geojson");
+
+            // Data from https://roadtraffic.dft.gov.uk/api/average-annual-daily-flow-by-direction?filter[local_authority_id]=71
+            let traffic_counts = d3.csv("/data/traffic_counts_71.csv");
+
+            // If data is loaded
+            Promise.all([locations, traffic_counts])
+                    .then(function (values) {
+
+                        const geojson = values[0];
+                        data = values[1];
+
+                        // Add layer from geojson
+                        map.addSource('locations', {
+                            'type': 'geojson',
+                            'data': geojson
+                        });
+
+                        // Create Layer from Source
+                        map.addLayer({
+                            'id': 'points',
+                            'source': 'locations',
+                            'type': 'circle',
+                            // set the style of the features
+                            'paint': {
+                                'circle-radius': 5,
+                                'circle-color': '#008cba',
+                                'circle-stroke-color': '#fff',
+                                'circle-stroke-width': 2
+                            }
+                        });
+
+                        // Change the cursor style as a UI indicator.
+                        map.on('mouseenter', 'points', function () {
+                            map.getCanvas().style.cursor = 'pointer';
+                        });
+
+                        // Change the cursor style to default.
+                        map.on('mouseleave', 'points', function () {
+                            map.getCanvas().style.cursor = '';
+                        });
+
+                        // if no features selected close popup and reset layer paint properties
+                        map.on('click', function () {
+                            closePopup();
+                        });
+
+                        // Map Interaction - Click on Feature
+                        map.on('click', 'points', function (e) {
+
+                            // features exist
+                            if (e.features.length > 0) {
+
+                                // select closest/first feature
+                                selected = e.features[0];
+
+                                // Style selected feature
+                                map.setPaintProperty('points', 'circle-color', [
+                                    'match',
+                                    ['get', 'count_point_id'],
+                                    selected.properties.count_point_id,
+                                    '#fd7e14',
+                                    /* other */ '#008cba'
+                                ]);
+
+                                // Create a Coordinates pair
+                                let coordinates = e.features[0].geometry.coordinates.slice();
+
+                                // Ensure that if the map is zoomed out such that multiple
+                                // copies of the feature are visible, the popup appears
+                                // over the copy being pointed to.
+                                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                                }
+
+                                // Animate map to location
+                                map.easeTo({center: coordinates, zoom: 9});
+
+                                //Create the popup description
+                                let description = `
+                            <div id="customPopupDetails" class="card border-light mb-3">
+                                <div class="card-header bg-primary text-white border-0">
+                                    Count Location ID - ` + selected.properties.count_point_id + `
+                                    <a type="button" class="close" onclick="closePopup()">×</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="text-muted">Region</label>
+                                            <p>` + selected.properties.region_name + `</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="text-muted">Local Authority</label>
+                                            <p>` + selected.properties.local_authority_name + `</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="text-muted">Road Name</label>
+                                            <p>` + selected.properties.road_name + `</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="text-muted">Road Type</label>
+                                            <p>` + selected.properties.road_type + `</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12 mb-1">
+                                        <hr>
+                                            <a class="btn btn-sm btn-secondary btn-lg btn-block" onclick="showFilteredData()">Click to view details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+
+                                // Add the Popup to the map
+                                popup
+                                        .setLngLat(coordinates)
+                                        .setHTML(description)
+                                        .addTo(map);
+
+                            }
+
+                        });
+
+                    })
+                    .catch(function (error) {
+                        console.log({error: error});
+                    });
+
+        });
+
+        // Setup the table
+        let table = $('#dataTable').DataTable({
+            columns: [
+                {
+                    title: 'Point ID',
+                    data: "count_point_id"
+                },
+                {
+                    title: 'Region',
+                    data: "region_name"
+                },
+                {
+                    title: 'Local Authority',
+                    data: "local_authority_name"
+                },
+                {
+                    title: 'Road Name',
+                    data: "road_name"
+                },
+                {
+                    title: 'Road Type',
+                    data: "road_type"
+                },
+                {
+                    title: 'Direction of Travel',
+                    data: "direction_of_travel"
+                },
+                {
+                    title: 'Year',
+                    data: "year"
+                },
+                {
+                    title: 'Push Bikes',
+                    data: 'pedal_cycles'
+                },
+                {
+                    title: 'All Motor Vehicles',
+                    data: "all_motor_vehicles"
+                },
+                {
+                    title: 'All HGVs',
+                    data: "all_hgvs"
+                },
+            ],
+            "order": [[6, 'asc'], [5, 'asc']] // Order by year then direction of travel
+        });
+
+    </script>
+{{/section}}

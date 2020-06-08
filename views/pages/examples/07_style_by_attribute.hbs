@@ -1,0 +1,872 @@
+{{#section 'header'}}
+
+
+    <!-- Load c3.css -->
+    <link href="/css/loader.css" rel="stylesheet">
+
+    <!-- Load c3.css -->
+    <link href="/js/c3/c3.min.css" rel="stylesheet">
+
+    <style>
+
+        /* Map */
+        .map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 350px;
+            bottom: 0;
+            height: auto;
+            z-index: 0;
+        }
+
+        /* Search Menu */
+        .searchMenu {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 350px;
+            height: 100%;
+            padding: 10px 20px;
+            z-index: 0;
+        }
+
+        #infoCard {
+            right: 360px;
+        }
+
+        /* Mobile View */
+        @media only screen and (max-width: 991px) {
+            main {
+                position: relative;
+                display: block;
+                width: 100%;
+                height: auto;
+                margin-bottom: 43px;
+            }
+
+            .map {
+                position: relative;
+                display: block;
+                width: 100%;
+                height: 70vw;
+                right: 0px;
+                bottom: auto;
+            }
+
+            .mapContainer {
+                position: relative;
+                left: 0;
+                right: 0;
+                bottom: auto;
+                width: 100%;
+                margin-bottom: 0;
+            }
+
+            .searchMenu {
+                position: relative!important;
+                width: 100%;
+                height: auto;
+                min-height: 30vh;
+            }
+
+            #infoCard {
+                position: relative;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: auto;
+                width: 100%;
+                max-width: 100vw;
+                border: none;
+            }
+        }
+
+        /* Mobile View */
+        @media only screen and (max-width: 991px) {
+            main {
+                position: relative;
+                width: 100%;
+                display: block;
+                margin-bottom: 43px;
+            }
+
+            .map {
+                position: relative;
+                width: 100%;
+                height: 70vh;
+                flex-grow: 0;
+            }
+
+            .menu {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+        /* Popups Style Overiders */
+        .mapboxgl-popup-content {
+            padding: 0;
+            background-color: transparent;
+        }
+
+        #customPopup {
+            padding: 7px 10px;
+            border-color: transparent !important;
+        }
+
+        #customPopup p {
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        #customPopup .card-body {
+            padding: 7px 10px;
+        }
+
+        #customPopupDetails {
+            width: 350px;
+            border-color: transparent !important;
+            margin-bottom: 0 !important;
+        }
+
+        #customPopupDetails .card-header {
+            font-size: 1rem;
+            line-height: 1.40625rem;
+        }
+
+        #customPopupDetails .card-header, #customPopupDetails .card-body {
+            padding: 7px 10px;
+            font-family: "Poppins", sans-serif;
+        }
+
+        #customPopupDetails .card-body {
+            padding-bottom: 10px;
+        }
+
+        #customPopupDetails label {
+            text-transform: uppercase;
+            font-size: 0.5rem;
+            margin-bottom: 2px;
+        }
+
+        #customPopupDetails p {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        /* Custom form label */
+        .formLabel {
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+
+        /* Zoom issue warning */
+        .dataWarning {
+            display: none;
+        }
+
+        /* Map Legend */
+        .mapLegend {
+            position: absolute;
+            bottom: 30px;
+            right: 10px;
+            width: 200px;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 1;
+            padding: 10px;
+            font-family: "Poppins", sans-serif;
+            text-align: right;
+        }
+
+        .legendSubTitle {
+            font-size: 0.6rem;
+        }
+
+        .colourRamp {
+            width: 100%;
+            height: 15px;
+            background: linear-gradient(90deg, rgba(34, 170, 0, 1) 0%, rgba(255, 237, 0, 1) 50%, rgba(255, 0, 0, 1) 100%);
+            border-bottom: 1px solid #585858;
+            border-left: 1px solid #585858;
+            border-right: 1px solid #585858;
+        }
+
+        .rampLabel {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Chart font override */
+        .c3, .c3 svg {
+            font-family: "Poppins", sans-serif;
+        }
+
+        #chart {
+            height: 300px;
+            display: none;
+        }
+
+        .loader {
+            height: 300px;
+        }
+
+
+    </style>
+{{/section}}
+
+<div class="mapContainer">
+
+    {{> info}}
+
+    <div id="map" class="map">
+
+        <!--Legend-->
+        <div class="mapLegend">
+
+            <p class="legendTitle mb-0">Legend</p>
+
+            <p class="legendSubTitle text-muted text-uppercase mb-1">Number of Motor Vehicles</p>
+
+            <div class="colourRamp"></div>
+
+            <div class="rampLabel">
+
+                <div class="labelMin">
+                    0
+                </div>
+
+                <div class="labelMax">
+                    60000
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!--Menu-->
+    <div class="searchMenu shadow">
+
+        <!--Filter Options-->
+        <h4 class="mt-2">Filter Traffic Data</h4>
+        <hr class="my-1">
+
+        <!--Filter Year-->
+        <label class="formLabel text-muted">Year</label>
+        <select id="selectYear" class="custom-select mb-2">
+            <option value=2018 selected>2018</option>
+            <option value=2017>2017</option>
+            <option value=2016>2016</option>
+            <option value=2015>2015</option>
+            <option value=2014>2014</option>
+            <option value=2013>2013</option>
+            <option value=2012>2012</option>
+            <option value=2011>2011</option>
+            <option value=2010>2010</option>
+            <option value=2009>2009</option>
+            <option value=2008>2008</option>
+            <option value=2007>2007</option>
+            <option value=2006>2006</option>
+            <option value=2005>2005</option>
+            <option value=2004>2004</option>
+            <option value=2003>2003</option>
+            <option value=2002>2002</option>
+            <option value=2001>2001</option>
+            <option value=2000>2000</option>
+        </select>
+
+        <!--Filter Road Type-->
+        <label class="formLabel text-muted">Road Type</label>
+        <select id="selectRoadType" class="custom-select mb-2">
+            <option value='all' selected>All</option>
+            <option value='Major'>Major</option>
+            <option value='Minor'>Minor</option>
+        </select>
+
+        <!--Filter Travel Direction-->
+        <label class="formLabel text-muted">Travel Direction</label>
+        <select id="selectDirection" class="custom-select mb-2">
+            <option value='N' selected>North</option>
+            <option value='S'>South</option>
+            <option value='E'>East</option>
+            <option value='W'>West</option>
+        </select>
+
+        <!--Filter Vehicle Type-->
+        <label class="formLabel text-muted">Vehicle Type</label>
+        <select id="selectVehicleType" class="custom-select mb-2">
+            <option value='all_motor_vehicles' selected>All Motor Vehicles</option>
+            <option value='all_hgvs'>HGVs & Articulated Vehicles</option>
+            <option value='pedal_cycles'>Push Bikes</option>
+        </select>
+
+        <!--Filter Estimation Method-->
+        <label class="formLabel text-muted">Estimation Method</label>
+        <select id="selectEstimationMethod" class="custom-select mb-3">
+            <option value='all' selected>All</option>
+            <option value='Counted'>Counted</option>
+            <option value='Estimated'>Estimated</option>
+        </select>
+
+        <!--Reset Filters-->
+        <div class="text-right">
+            <a id="filterReset" type="button" class="btn btn-danger text-white">Reset</a>
+        </div>
+
+        <!--Zoom Level Warning-->
+        <p class="dataWarning text-danger mt-4 text-center"><small>WARNING - Zoom in to view points!!!</small></p>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white px-4">
+                <!-- Modal Title -->
+                <h5 class="modal-title">
+                    Count Point ID -
+                    <span id="dataModalLabel" class="td_count_point_id"></span>
+                </h5>
+                <!-- Close Modal -->
+                <a type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </a>
+
+            </div>
+            <div id="dataModalBody" class="modal-body p-4">
+                <div class="row">
+                    <!-- Feature Details -->
+                    <div class="col-12 col-md-6">
+                        <div class="row">
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Region</label>
+                                <p class="td_region_name"></p>
+
+                            </div>
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Local Authority</label>
+                                <p class="td_local_authority_name"></p>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Road Name</label>
+                                <p class="td_road_name"></p>
+
+                            </div>
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Road Type</label>
+                                <p class="td_road_type"></p>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Road Category</label>
+                                <p class="td_road_category"></p>
+
+                            </div>
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Travel Direction</label>
+                                <p class="td_direction_of_travel"></p>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Vehicle Type</label>
+                                <p class="td_vehicle_type"></p>
+
+                            </div>
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Estimation Method</label>
+                                <p class="td_estimation_method"></p>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Latitude</label>
+                                <p class="td_latitude"></p>
+
+                            </div>
+                            <div class="col-6">
+
+                                <label class="formLabel text-muted">Longitude</label>
+                                <p class="td_longitude"></p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="row">
+                            <!-- Chart Title -->
+                            <div class="col-12 text-center">
+                                <label class="formLabel text-muted">Vehicle Count</label>
+
+                            </div>
+                            <!-- Pie Chart -->
+                            <div class="col-12">
+                                {{> loader}}
+                                <div id="chart"></div>
+                            </div>
+
+                            <!-- Total Vehicles -->
+                            <div class="col-12 text-center">
+                                <label class="formLabel text-muted">
+                                    Total -
+                                    <span class="td_vehicle_count"></span>
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer px-4">
+                <!-- Close Modal -->
+                <a type="button" class="btn btn-secondary" data-dismiss="modal">Close</a>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{{#section 'script'}}
+
+    <!-- D3.js -->
+    <script src="/js/d3/d3.v5.min.js"></script>
+
+    <!-- Load c3.css -->
+    <script src="/js/c3/c3.min.js"></script>
+
+    <script>
+
+        // Default filter options
+        let filters = {
+            year: 2018,
+            road_type: 'all',
+            direction_of_travel: 'N',
+            vehicle_type: 'all_motor_vehicles',
+            estimation_method: 'all'
+        }
+
+        // Data Place holders
+        let selected = null; // selected feature
+        let data = null; // geojson
+
+        // Mapbox token
+        mapboxgl.accessToken = "{{mapboxToken}}";
+        // Create the Map
+        let map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
+            center: [-3.70, 50.72], // starting position [lng, lat]
+            zoom: 9 // starting zoom
+        });
+
+        // Add Navigation control
+        map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+        // Add Current Location control
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }), 'top-left');
+
+        // Add map Scale
+        map.addControl(new mapboxgl.ScaleControl({
+            maxWidth: 80,
+            unit: 'metric'
+        }), 'bottom-left');
+
+        // Create Popup
+        let popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            maxWidth: '350px'
+        });
+
+        // Close popup and reset layer paint properties
+        function closePopup() {
+            popup.remove();
+            selected = null;
+        }
+
+        // Map is Loaded
+        map.on('load', function () {
+
+            // Add layer from Mapbox
+            map.addSource('locations', {
+                type: 'vector',
+                url: 'mapbox://msharp.8sp7r3z3'
+            });
+
+            // Create Layer from Source
+            map.addLayer({
+                'id': 'points',
+                'source': 'locations',
+                'source-layer': 'dft_traffic_counts_by_directi-2ivipb',
+                'type': 'circle',
+                // set the style of the features
+                'paint': {
+                    'circle-radius': 5,
+                    'circle-color': {
+                        property: 'all_motor_vehicles', // Select property
+                        stops: [[0, '#22aa00'], [30000, '#ffed00'], [60000, '#ff0000']] // Create Gradient
+                    },
+                    'circle-stroke-color': '#fff',
+                    'circle-stroke-width': 1,
+                }
+            });
+
+            // Set Filters - Update map & legend
+            setFilters();
+
+
+            // Change the cursor style as a UI indicator.
+            map.on('mouseenter', 'points', function () {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // Change the cursor style to default.
+            map.on('mouseleave', 'points', function () {
+                map.getCanvas().style.cursor = '';
+            });
+
+
+            // if no features selected close popup and reset layer paint properties
+            map.on('click', function () {
+                closePopup();
+            });
+
+            // Trigger zoom warning after map zoomed
+            map.on('zoomend', function () {
+                let zoomLevel = map.getZoom();
+                if (zoomLevel < 9) {
+                    $('.dataWarning').show();
+                } else {
+                    $('.dataWarning').hide();
+                }
+            });
+
+            // Map Interaction - Click on Feature
+            map.on('click', 'points', function (e) {
+
+                // features exist
+                if (e.features.length > 0) {
+                    // select closest/first feature
+                    selected = e.features[0];
+
+                    // Create a Coordinates pair
+                    let coordinates = selected.geometry.coordinates.slice();
+
+                    // Ensure that if the map is zoomed out such that multiple
+                    // copies of the feature are visible, the popup appears
+                    // over the copy being pointed to.
+                    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                    }
+
+                    // Move map to location
+                    map.easeTo({center: coordinates});
+
+                    // Create Labels based on feature properties & filters
+                    let vehicleTypeLabel;
+                    let vehicleCount = selected.properties[filters.vehicle_type];
+
+                    if (filters.vehicle_type === 'all_motor_vehicles') {
+
+                        vehicleTypeLabel = 'Number of Motor Vehicles';
+
+                    } else if (filters.vehicle_type === 'all_hgvs') {
+
+                        vehicleTypeLabel = 'Number of HGVs & Articulated Vehicles';
+
+                    } else if (filters.vehicle_type === 'pedal_cycles') {
+
+                        vehicleTypeLabel = 'Number of Push Bikes';
+                    }
+
+                    //Create the popup description
+                    let description = `
+                            <div id="customPopupDetails" class="card border-light mb-3">
+                                <div class="card-header bg-primary text-white border-0">
+                                    Count Location ID - ` + selected.properties.count_point_id + `
+                                    <a type="button" class="close" onclick="closePopup()">×</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="text-muted">Road Name</label>
+                                            <p>` + selected.properties.road_name + `</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="text-muted">Road Type</label>
+                                            <p>` + selected.properties.road_type + `</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="text-muted">Estimation Method</label>
+                                            <p>` + selected.properties.estimation_method + `</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="text-muted">` + vehicleTypeLabel + `</label>
+                                            <p>` + vehicleCount + `</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12 mb-1">
+                                        <hr>
+                                            <a class="btn btn-sm btn-secondary btn-lg btn-block" onclick="showFilteredData()">Click to view details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+
+                    // Add the Popup to the map
+                    popup
+                            .setLngLat(coordinates)
+                            .setHTML(description)
+                            .addTo(map);
+
+                }
+            });
+        });
+
+        // Filter Features and create layer style based on filters
+        function setFilters() {
+
+            // Create filter function
+            let mapFilter = [
+                "all",
+            ];
+
+            if (filters.year) {
+                mapFilter.push(["==", "year", parseInt(filters.year)]);
+            }
+
+            if (filters.road_type !== 'all') {
+                mapFilter.push(["==", "road_type", filters.road_type]);
+            }
+
+            if (filters.direction_of_travel) {
+                mapFilter.push(["==", "direction_of_travel", filters.direction_of_travel]);
+            }
+
+            if (filters.estimation_method !== 'all') {
+                mapFilter.push(["==", "estimation_method", filters.estimation_method]);
+            }
+
+            // Set filter
+            map.setFilter('points', mapFilter);
+
+            // Create layer style
+            let max = 60000;
+
+            let opt = {
+                property: 'all_motor_vehicles',
+                stops: [[0, '#22aa00'], [max / 2, '#ffed00'], [max, '#ff0000']]
+            }
+
+            opt.property = filters.vehicle_type;
+
+            if (filters.vehicle_type === 'all_motor_vehicles') {
+
+                max = 60000;
+                $('.legendSubTitle').html('Number of Motor Vehicles');
+                $('.labelMax').html(max);
+                opt.stops = [[0, '#22aa00'], [max / 2, '#ffed00'], [max, '#ff0000']];
+
+            } else if (filters.vehicle_type === 'all_hgvs') {
+
+                max = 4500;
+                $('.legendSubTitle').html('Number of HGVs & Articulated Vehicles');
+                $('.labelMax').html(max);
+                opt.stops = [[0, '#22aa00'], [max / 2, '#ffed00'], [max, '#ff0000']];
+
+            } else if (filters.vehicle_type === 'pedal_cycles') {
+
+                max = 1050;
+                $('.legendSubTitle').html('Number of Push Bikes');
+                $('.labelMax').html(max);
+                opt.stops = [[0, '#22aa00'], [max / 2, '#ffed00'], [max, '#ff0000']];
+            }
+
+            // Set style
+            map.setPaintProperty('points', 'circle-color', opt);
+        }
+
+        // Update filters on change
+        $('.custom-select').on('change', function () {
+            filters.year = $('#selectYear').val();
+            filters.road_type = $('#selectRoadType').val();
+            filters.direction_of_travel = $('#selectDirection').val();
+            filters.vehicle_type = $('#selectVehicleType').val();
+            filters.estimation_method = $('#selectEstimationMethod').val();
+
+            // Filter Features and create layer style based on filters
+            setFilters();
+        });
+
+        // Reset Filters to defaults
+        $('#filterReset').click(function () {
+
+            filters = {
+                year: 2018,
+                road_type: 'all',
+                direction_of_travel: 'N',
+                vehicle_type: 'all_motor_vehicles',
+                estimation_method: 'all'
+            }
+
+            $('#selectYear').val(2018);
+            $('#selectRoadType').val('all');
+            $('#selectDirection').val('N');
+            $('#selectVehicleType').val('all_motor_vehicles');
+            $('#selectEstimationMethod').val('all');
+
+            // Filter Features and create layer style based on filters
+            setFilters();
+
+            // Clear popup
+            popup.remove();
+        });
+
+        // Get data from selected feature and show in Modal
+        function showFilteredData() {
+
+            // Clear the popup
+            popup.remove();
+
+            // Placeholder for chart data
+            let dataColumns = [];
+
+            // List of feature properties of interest
+            let propertiesList = [
+                'count_point_id',
+                'region_name',
+                'local_authority_name',
+                'road_name',
+                'road_type',
+                'road_category',
+                'estimation_method'
+            ];
+
+            // Shorthand to human readable
+            let travelDirection = {
+                N: 'North',
+                S: 'South',
+                E: 'East',
+                W: 'West'
+            };
+
+            // if there is a selected feature
+            if (selected) {
+                // loop through the property List
+                for (let i = 0; i < propertiesList.length; i++) {
+                    // Update the corresponding html elements
+                    $('.td_' + propertiesList[i]).html(selected.properties[propertiesList[i]]);
+                }
+            }
+
+            // Convert attribute and update corresponding html element
+            $('.td_direction_of_travel').html(travelDirection[selected.properties.direction_of_travel]);
+
+            // Convert geometry and update corresponding html element
+            $('.td_latitude').html(selected._geometry.coordinates[1].toFixed(5));
+            $('.td_longitude').html(selected._geometry.coordinates[0].toFixed(5));
+
+            // Create chart data based on vehicle type
+            switch (filters.vehicle_type) {
+                case 'all_motor_vehicles':
+                    // Update corresponding html element
+                    $('.td_vehicle_type').html('All Motor Vehicles');
+                    // Create data from feature properties
+                    dataColumns = [
+                        ['Two Wheeled Motor Vehicles', selected.properties.two_wheeled_motor_vehicles],
+                        ['Cars & Taxis', selected.properties.cars_and_taxis],
+                        ['Buses & Coaches', selected.properties.buses_and_coaches],
+                        ['Light vans', selected.properties.lgvs],
+                        ['HGVs & Articulated Vehicles', selected.properties.all_hgvs],
+                    ];
+                    // Update chart total
+                    $('.td_vehicle_count').html(selected.properties.all_motor_vehicles);
+                    break;
+                case 'all_hgvs':
+                    // Update corresponding html element
+                    $('.td_vehicle_type').html('HGVs & Articulated Vehicles');
+                    // Create data from feature properties
+                    dataColumns = [
+                        ['Rigid HGV with two axles', selected.properties.hgvs_2_rigid_axle],
+                        ['Rigid HGV with three axles', selected.properties.hgvs_3_rigid_axle],
+                        ['Rigid HGV with four or more axles', selected.properties.hgvs_4_or_more_rigid_axle],
+                        ['Articulated HGV with three or four axles ', selected.properties.hgvs_3_or_4_articulated_axle],
+                        ['Articulated HGV with five axles', selected.properties.hgvs_5_articulated_axle],
+                        ['Articulated HGV with six or more axles', selected.properties.hgvs_6_articulated_axle],
+                    ];
+                    // Update chart total
+                    $('.td_vehicle_count').html(selected.properties.all_hgvs);
+                    break;
+                case 'pedal_cycles':
+                    // Update corresponding html element
+                    $('.td_vehicle_type').html('Push Bikes');
+                    // Create data from feature properties
+                    dataColumns = [[
+                        'Push Bikes', selected.properties.pedal_cycles
+                    ]];
+                    // Update chart total
+                    $('.td_vehicle_count').html(selected.properties.pedal_cycles);
+                    break;
+            }
+
+            // Show the modal
+            $('#dataModal').modal('show');
+
+            // Chart container needs to be visible before creating the chart to set svg width & height
+            setTimeout(function () {
+                $('.loader').hide();
+                $('#chart').show();
+                // Create the chart
+                let chart = c3.generate({
+                    data: {
+                        bindto: '#chart',
+                        columns: dataColumns,
+                        type: 'pie',
+                    },
+                    tooltip: {
+                        format: {
+                            value: function (value, ratio, id, index) {
+                                return value; // use value instead of %
+                            }
+                        }
+                    },
+                    size: {
+                        height: 300 // set max height
+                    }
+                });
+            }, 500);
+
+        }
+    </script>
+{{/section}}

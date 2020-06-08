@@ -1,0 +1,7 @@
+{
+  "name": "Traffic Data Visualistion",
+  "description": "An experiment using Road Traffic Open Data, mapbox & D3.js",
+  "repository": "https://github.com/mike-web-dev/traffic-data.git",
+  "logo": "https://i.imgur.com/ksfkDzc.png",
+  "keywords": ["node", "express", "webserver", "handlebars", "mapbox", "expressjs", "javascript", "d3"]
+}

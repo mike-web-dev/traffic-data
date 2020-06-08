@@ -1,0 +1,291 @@
+{{#section 'header'}}
+    <style>
+
+        body {
+
+        }
+
+        main {
+            flex-direction: column;
+        }
+
+        .header {
+            position: relative;
+            display: flex;
+            padding-top: 100px;
+            padding-bottom: 100px;
+            background: url(/img/stock/street.jpg) no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+
+        .mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .pageTitle {
+            font-size: 4rem;
+            font-weight: 700;
+        }
+
+        .flexMiddle {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+{{/section}}
+
+<div class="header">
+    <div class="mask"></div>
+    <div class="container py-4">
+        <div class="row py-4">
+            <div class="col">
+                <h1 class="pageTitle text-white text-uppercase">The Task</h1>
+                <h4 class="text-white mb-4">
+                    To create a web page that allows you to explore and interact with <a
+                        class="text-info text-decoration-none" href="https://roadtraffic-docs.dft.gov.uk/#api">
+                    Road Traffic Open Data</a> supplied by the UK government for Devon.
+                </h4>
+            </div>
+        </div>
+    </div>
+</div>
+<nav aria-label="breadcrumb" class="bg-secondary">
+    <div class="container">
+        <ol class="breadcrumb border-0 bg-transparent mb-0 py-3 pl-0">
+            <li class="breadcrumb-item">Traffic Data</li>
+            <li class="breadcrumb-item active" aria-current="page">The Task</li>
+        </ol>
+    </div>
+</nav>
+<div class="container my-4">
+    <div class="row mb-2">
+        <div class="col">
+            <h2 class="font-weight-bold text-uppercase">The Data</h2>
+            <hr>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <p>
+                The UK Government provide Road traffic data for free, the data can be accessed by and API from
+                <a class="text-decoration-none" href="https://roadtraffic-docs.dft.gov.uk/#api">here</a> or downloaded
+                as a zip/csv from
+                <a class="text-decoration-none" href="https://roadtraffic.dft.gov.uk/downloads">here</a>.
+            </p>
+            <p>
+                For the purposes of the demo I downloaded the "AADF Data by direction - major roads" zip. This data
+                contains the Number of vehicles that travel past the count point on an average day of the year by
+                direction oftravel.
+            </p>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col">
+            <h2 class="font-weight-bold text-uppercase">Processing</h2>
+            <hr>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <p>
+                The reason for using the zip instead of the API was for two reasons.
+            </p>
+            <ul>
+                <li>
+                    The API uses paginated data, limits the ammout of data we can interact with at any one time.
+                </li>
+                <li>
+                    To avoid CORS issues in the development stage
+                </li>
+            </ul>
+            <p>
+                Downloading the data also lets us do a number of interesting things. First of all there's a lot of it,
+                so we can filter the data by "local_authority_id" 71, which is for Devon. Secondly each location has
+                multiple directions of travel, this means that there can be multiple points at the same location.
+            </p>
+            <p>
+                To compensate for this I used
+                <a class="text-decoration-none" href="https://www.qgis.org/en/site/">QGIS</a> a free and Open Source
+                Geographic Information System to filter the data and create a
+                <a class="text-decoration-none" href="https://geojson.org/">GeoJson</a> of all the unique Locations.
+            </p>
+            <p>
+                We then clean the location data to remove any of the vehicle count information. We also cleaned up the
+                traffic count data to remove any location based information. This reduced the file sizes and will make
+                importing the data into a database slightly easier, but that is a task for another time.
+            </p>
+            <p class="mb-4">
+                I wanted to supplement the data with the road direction/bearing, to do this i downloaded the roads from
+                <a class="text-decoration-none" href="https://www.ordnancesurvey.co.uk/opendatadownload/products.html">OS
+                    OpenData
+                </a>. As you can see from the images below the roads didn't quite line up, so I used the QGIS function
+                "snap to line" to create an updated set of points/locations, created a buffer around the point and
+                calculated the bearing of the road where it intersected with the buffer.
+            </p>
+            <div class="row ">
+                <div class="col-12 col-md-6">
+                    <img src="/img/qgis-1.jpg" class="img-fluid shadow-sm mb-4" alt="Responsive image">
+                </div>
+                <div class="col-12 col-md-6">
+                    <img src="/img/qgis-2.jpg" class="img-fluid shadow-sm mb-4" alt="Responsive image">
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-12 col-md-6">
+                    <img src="/img/qgis-3.jpg" class="img-fluid shadow-sm mb-4" alt="Responsive image">
+                </div>
+                <div class="col-12 col-md-6">
+                    <img src="/img/qgis-4.jpg" class="img-fluid shadow-sm mb-4" alt="Responsive image">
+                </div>
+            </div>
+            <p>A geojson of the locations can be found <a href="/">here</a> and a CSV of the count data <a
+                    href="/">here</a></p>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col">
+            <h2 class="font-weight-bold text-uppercase">Visualisation</h2>
+            <hr>
+        </div>
+    </div>
+    <div class="row mb-4">
+
+        <div class="col-12 col-md-6 flexMiddle">
+            <div class="flex-column">
+                <img src="/img/mapbox-logo.png" height="50" class="mb-4" alt="Responsive image">
+                <p>
+                    <a class="text-decoration-none" href="https://www.mapbox.com/">Mapbox</a> is a provider of custom
+                    online
+                    maps for websites and applications. It provides a number of different services, libraries and SDKs.
+                    In
+                    this project we will be using
+                    <a class="text-decoration-none" href="https://docs.mapbox.com/mapbox-gl-js/api/">MapboxGL.js</a>,
+                    <a class="text-decoration-none" href="https://docs.mapbox.com/help/glossary/tileset/">Mapbox
+                        Tilesets</a>,
+                    <a class="text-decoration-none" href="https://docs.mapbox.com/api/search/">Mapbox Geocoder</a>.
+                </p>
+                <p>
+                    You can sign up for free
+                    <a class="text-decoration-none" href="https://account.mapbox.com/auth/signup/">here</a>
+                </p>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 flexMiddle">
+            <img src="/img/mapbox.jpg" class="img-fluid my-4 shadow-sm align-middle" alt="Responsive image">
+        </div>
+
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12 col-md-6 order-md-last text-md-right flexMiddle">
+            <div class="flex-column">
+                <img src="/img/turf-logo.png" height="50" class="mb-4" alt="Responsive image">
+                <p class="mb-4">
+                    <a class="text-decoration-none" href="https://turfjs.org/">turf.js</a> is a geospatial
+                    analysis library
+                    for browsers and Node.js. It is a collection of small modules written in JavaScript that
+                    works with
+                    GeoJsons
+                </p>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 order-md-first flexMiddle">
+            <img src="/img/turf.jpg" class="img-fluid my-4 shadow-sm" alt="Responsive image">
+        </div>
+
+    </div>
+    <div class="row mb-4">
+
+        <div class="col-12 col-md-6 flexMiddle">
+            <div class="flex-column">
+                <img src="/img/d3-logo.png" height="60" class="mb-4" alt="Responsive image">
+                <p class="mb-4">
+                    <a class="text-decoration-none" href="https://d3js.org/">D3</a> stands for Data-Driven Documents.
+                    It is an open-source JavaScript library developed by Mike Bostock to create custom interactive data
+                    visualizations in the web browser using SVG, HTML and CSS.
+                </p>
+
+            </div>
+        </div>
+        <div class="col-12 col-md-6 flexMiddle">
+            <img src="/img/d3.jpg" class="img-fluid my-4 shadow-sm" alt="Responsive image">
+        </div>
+
+    </div>
+    <div class="row mb-4">
+        <div class="col-12 col-md-6 order-md-last text-md-right flexMiddle">
+            <div class="flex-column">
+                <img src="/img/c3-logo.png" height="60" class="mb-4 shadow-sm" alt="Responsive image">
+                <p class="mb-4">
+                    <a class="text-decoration-none" href="https://c3js.org/">c3.js</a> is a D3-based reusable chart
+                    library that enables deeper integration of charts into web applications.
+                </p>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 order-md-first flexMiddle">
+            <img src="/img/c3.jpg" class="img-fluid my-4 shadow-sm" alt="Responsive image">
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-12 col-md-6 flexMiddle">
+            <div class="flex-column">
+                <img src="/img/google-logo.png" height="50" class="mb-4" alt="Responsive image">
+                <p class="mb-4">
+                    <a class="text-decoration-none"
+                       href="https://developers.google.com/maps/documentation/streetview/intro">Street View Static
+                        API</a>
+                    lets us embed a static (non-interactive) Street View panorama or thumbnail into your web page,
+                    without the use of JavaScript. The viewport is defined with URL parameters sent through a standard
+                    HTTP request, and is returned as a static image.
+                </p>
+
+            </div>
+        </div>
+        <div class="col-12 col-md-6 flexMiddle">
+            <img src="/img/google.jpg" class="img-fluid my-4 shadow-sm" alt="Responsive image">
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col">
+            <h2 class="font-weight-bold text-uppercase">Exampls</h2>
+            <hr>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <p>
+                The next section covers an number of different examples using the the above libraries and data or you
+                can view a mockup of the dashboard <a href="/dashboard">here</a>
+            </p>
+            <p>
+                <a href="/examples" class="btn btn-primary btn-lg" role="button" aria-pressed="true">View Examples</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar navbar-light bg-light">
+    <p class="gitLink text-center mb-1 w-100">
+        <small>View code on <a class="text-decoration-none" href="{{gitUrl}}">Github</a></small>
+    </p>
+</nav>
+
+
+
+{{#section 'script'}}
+
+    <script>
+
+
+    </script>
+{{/section}}

@@ -1,0 +1,73 @@
+<!--Navbar-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm px-4 border-bottom border-info">
+    <a class="navbar-brand text-uppercase " href="/">
+        <img src="/img/car-solid.png" width="25" alt="" class="mb-1 mr-1" loading="lazy">
+        Traffic Data
+    </a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+                <a class="nav-link {{#compare  url "/home" operator="==="}}active{{/compare}}"  href="/home">
+                    Home
+                </a>
+            </li>
+            <li class="nav-item ">
+                <a class="nav-link {{#compare  url "/examples" operator="==="}}active{{/compare}}"  href="/examples">
+                    Examples
+                </a>
+            </li>
+            <li class="nav-item ml-2 d-sm-block d-lg-none">
+                <a class="nav-link {{#compare  url "/examples/mapbox-layer" operator="==="}}active{{/compare}}"  href="/examples">
+                    - Load data from Mapbox
+                </a>
+            </li>
+            <li class="nav-item ml-2 d-sm-block d-lg-none">
+                <a class="nav-link {{#compare  url "/examples/geojson-layer" operator="==="}}active{{/compare}}"  href="/examples/geojson-layer">
+                    - Load data from a GeoJson
+                </a>
+            </li>
+            <li class="nav-item ml-2 d-sm-block d-lg-none">
+                <a class="nav-link {{#compare  url "/examples/d3-load" operator="==="}}active{{/compare}}"  href="/examples/d3-load">
+                    - Load data using d3
+                </a>
+            </li>
+            <li class="nav-item ml-2 d-sm-block d-lg-none">
+                <a class="nav-link {{#compare  url "/examples/d3-overlay" operator="==="}}active{{/compare}}"  href="/examples/d3-layer">
+                    - d3 Overlay
+                </a>
+            </li>
+
+            <li class="nav-item ml-2 d-sm-block d-lg-none">
+                <a class="nav-link {{#compare  url "/examples/search-by-location" operator="==="}}active{{/compare}}"  href="/examples/search-by-location">
+                    - Search by location
+                </a>
+            </li>
+            <li class="nav-item ml-2 d-sm-block d-lg-none">
+                <a class="nav-link {{#compare  url "/examples/get-street-view" operator="==="}}active{{/compare}}"  href="/examples/get-street-view">
+                    - Get Google Street View
+                </a>
+            </li>
+            <li class="nav-item ml-2 d-sm-block d-lg-none">
+                <a class="nav-link {{#compare  url "/examples/chart-types" operator="==="}}active{{/compare}}"  href="/examples/chart-types">
+                    - Chart Types
+                </a>
+            </li>
+            <li class="nav-item ">
+                <a class="nav-link {{#compare  url "/dashboard" operator="==="}}active{{/compare}}"  href="/dashboard">
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item ">
+                <a class="nav-link {{#compare  url "/next-steps" operator="==="}}active{{/compare}}"  href="/next-steps">
+                    Next Steps
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

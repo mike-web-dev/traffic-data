@@ -1,0 +1,50 @@
+{
+  "name": "Traffic Data Visualistion",
+  "version": "1.0.0",
+  "description": "An experiment using Road Traffic Open Data, mapbox & D3.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "express",
+    "expressjs",
+    "server",
+    "node",
+    "nodejs",
+    "handlebars",
+    "boilerplate",
+    "template",
+    "templates",
+    "webserver",
+    "css"
+  ],
+  "readmeFilename": "README.md",
+  "author": {
+    "name": "Mike Sharp",
+    "email": "msharp.edin@googlemail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@turf/turf": "^5.1.6",
+    "bootstrap": "^4.5.0",
+    "cookie-parser": "~1.4.4",
+    "d3": "^5.16.0",
+    "debug": "~2.6.9",
+    "dotenv": "^8.2.0",
+    "express": "~4.16.1",
+    "express-handlebars": "^4.0.4",
+    "fs": "0.0.1-security",
+    "hbs": "^4.1.1",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "topojson-server": "^3.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mike-web-dev/traffic-data.git"
+  },
+  "homepage": "https://travel-data.herokuapp.com/"
+}

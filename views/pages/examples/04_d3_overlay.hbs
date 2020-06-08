@@ -1,0 +1,219 @@
+{{#section 'header'}}
+    <style>
+
+        /* d3 vg */
+        svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+{{/section}}
+
+<div class="mapContainer">
+    <div id="map" class="map"></div>
+    {{> info}}
+</div>
+
+{{#section 'script'}}
+
+    <!-- D3.js -->
+    <script src="/js/d3/d3.v5.min.js"></script>
+
+    <script>
+
+        // Mapbox token
+        mapboxgl.accessToken = "{{mapboxToken}}";
+
+        // Create the Map
+        let map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+            center: [-3.70, 50.72], // starting position [lng, lat]
+            zoom: 8 // starting zoom
+        });
+
+        // Add Navigation control
+        map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+        // Add Current Location control
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }), 'top-left');
+
+        // Add map Scale
+        map.addControl(new mapboxgl.ScaleControl({
+            maxWidth: 80,
+            unit: 'metric'
+        }), 'bottom-right');
+
+        // Create Popup
+        let popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            maxWidth: '350px'
+        });
+
+        // Close popup and reset selected feature & layer paint properties
+        function closePopup() {
+            popup.remove();
+            selected = null;
+        }
+
+        // clear the popup
+        map.on('click', function () {
+            popup.remove()
+        });
+
+        map.on("load", function () {
+            // Setup our svg layer that we can manipulate with d3
+            let container = map.getCanvasContainer();
+            let svg = d3.select(container).append("svg");
+
+            // select the mapp
+            let box = document.querySelector('.map');
+
+            // get width and height
+            let width = box.offsetWidth;
+            let height = box.offsetHeight;
+
+            // we calculate the scale given mapbox state (derived from viewport-mercator-project's code)
+            // to define a d3 projection
+            function getD3() {
+                let box = document.querySelector('.map');
+                let width = box.offsetWidth;
+                let height = box.offsetHeight;
+
+                let center = map.getCenter();
+                let zoom = map.getZoom();
+                // 512 is hardcoded tile size, might need to be 256 or changed to suit your map config
+                let scale = (512) * 0.5 / Math.PI * Math.pow(2, zoom);
+
+                let d3projection = d3.geoMercator()
+                        .center([center.lng, center.lat])
+                        .translate([width / 2, height / 2])
+                        .scale(scale);
+
+                return d3projection;
+            }
+
+            // calculate the original d3 projection
+            let d3Projection = getD3();
+
+            // Set projectionb
+            let path = d3.geoPath()
+                    .projection(d3Projection);
+
+            // create group
+            let g = svg.append('g');
+
+            // load the geojson
+            d3.json('/data/locations.geojson')
+                    .then(data => {
+
+                        // select the group
+                        g.selectAll('path') // select existing paths
+                                .data(data.features)
+                                .enter() // for each feature
+                                .append('path') // create path for each feature
+                                .attr('d', path) // assign feature to path
+                                .attr("fill", "#008cba") // style feature
+                                .attr("fill-opacity", 1)
+                                .attr("stroke", "#fff")
+                                .attr("stroke-width", 0.5)
+                                .attr("r", 10)
+                                .on('mouseover', function (d) {
+                                    // Change the cursor style as a UI indicator.
+                                    d3.select(container).style('cursor', 'pointer')
+                                })
+                                .on('mouseout', function (d) {
+                                    // Change the cursor style to default.
+                                    d3.select(container).style('cursor', 'default')
+                                })
+                                .on('click', function (d) {
+                                    // reset style for all features
+                                    g.selectAll('path').attr("fill", "#008cba");
+                                    // style selected feature
+                                    d3.select(this).attr('fill', '#fd7e14');
+                                    // animate map to location
+
+                                    map.easeTo({
+                                        center: d.geometry.coordinates,
+                                        zoom: map.getZoom() < 8 ? 8 : map.getZoom()
+                                    });
+                                    // show popup after animation
+                                    setTimeout(function () {
+                                        createPopup(d.geometry.coordinates, d);
+                                    }, 500);
+                                });
+                    })
+                    .catch(error => console.log(error));
+
+            // Update projection and path
+            function render() {
+                d3Projection = getD3();
+                path.projection(d3Projection);
+                g.selectAll('path').attr('d', path);
+            }
+
+            // update svg on map view change
+            map.on("viewreset", function () {
+                render();
+            });
+
+            // update svg on map view change
+            map.on("move", function () {
+                render();
+            });
+
+            // render our initial visualization
+            render();
+        });
+
+        function createPopup(coordinates, feature) {
+            // Create the popup description
+            let description = `
+                                <div id="customPopupDetails" class="card border-light mb-3">
+                                    <div class="card-header bg-primary text-white border-0">
+                                        Count Location ID - ` + feature.properties.count_point_id + `
+                                        <a type="button" class="close" onclick="closePopup()">×</a>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label class="text-muted">Region</label>
+                                                <p>` + feature.properties.region_name + `</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="text-muted">Local Authority</label>
+                                                <p>` + feature.properties.local_authority_name + `</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label class="text-muted">Road Name</label>
+                                                <p>` + feature.properties.road_name + `</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="text-muted">Road Type</label>
+                                                <p>` + feature.properties.road_type + `</p>
+                                            </div>
+                                       </div>
+
+                                    </div>
+                                </div>`;
+
+            // Add the Popup to the map
+            popup
+                .setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map);
+
+        }
+
+    </script>
+{{/section}}

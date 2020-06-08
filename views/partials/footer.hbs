@@ -1,0 +1,16 @@
+<!--Footer-->
+<nav aria-label="breadcrumb" class="footer fixed-bottom shadow">
+    <ol class="breadcrumb rounded-0 border-0 mb-0">
+        {{#each page}}
+            <li class="breadcrumb-item active" aria-current="page">
+                {{#if url}}
+                    <a class="text-decoration-none" href="{{url}}">{{title}}</a>
+                {{else}}
+                    {{title}}
+                {{/if}}
+            </li>
+        {{/each}}
+    </ol>
+</nav>
+
+

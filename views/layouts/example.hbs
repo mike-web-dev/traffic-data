@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
+
+    <!-- Mapbox -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.css" rel="stylesheet"/>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap-yeti.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <title>{{title}}</title>
+
+    {{{section.header}}}
+
+</head>
+<body>
+
+{{> navbar}}
+
+{{> menu}}
+
+<!--Map-->
+<main>
+    {{{body}}}
+</main>
+
+{{> footer}}
+
+<!-- jQuery.js, Popper.js, then Bootstrap JS -->
+<script src="/js/jquery-3.5.1.slim.min.js"></script>
+<script src="/js/bootstrap/popper.min.js"></script>
+<script src="/js/bootstrap/bootstrap.min.js"></script>
+
+<script>
+    $('#closeInfoCard').click(function() {
+        $('#infoCard').hide();
+    });
+</script>
+
+{{{section.script}}}
+
+</body>
+</html>

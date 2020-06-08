@@ -1,0 +1,521 @@
+{{#section 'header'}}
+    <style>
+
+        body {
+            background-color: #e8e8e8;
+        }
+
+        main {
+            flex-direction: column;
+
+        }
+
+        #locations {
+            min-height: 60vh;
+            font-family: "Poppins", sans-serif;
+        }
+
+        #radius {
+            width: 70px;
+            height: 100%;
+            padding: .45rem 1.5rem .45rem .5rem
+        }
+
+        #map {
+            width: 100%;
+            min-height: 60vh;
+            z-index: 0;
+        }
+
+        #table {
+            display: none;
+        }
+
+        .btn, .custom-select {
+            font-family: "Poppins", sans-serif;
+        }
+
+        #searchLocations {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 50%;
+            z-index: 1;
+        }
+
+        /* Geocoder Style Overiders */
+        #geocoder {
+            z-index: 1;
+            top: 20px;
+            border-radius: 0;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .mapboxgl-ctrl-geocoder {
+            margin: 0;
+            width: 100%;
+            box-shadow: none;
+            border-radius: 0;
+            border: 1px solid #ccc;
+        }
+
+        .mapboxgl-ctrl-geocoder--input {
+            font-family: "Poppins", sans-serif;
+        }
+
+        .mapboxgl-ctrl-geocoder .suggestions {
+            border-radius: 0;
+        }
+
+        .card-header {
+            z-index: 1;
+        }
+
+        /* Custom form label */
+        .formLabel {
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+
+        /* Chart font override */
+        .c3, .c3 svg {
+            font-family: "Poppins", sans-serif;
+        }
+
+
+    </style>
+{{/section}}
+
+<div class="container-fluid">
+    <div class="row mt-3">
+
+        <div class="col-12 col-md-12 col-lg-8 col-xl-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary shadow-sm p-2 border-0">
+                    <div class="btn-group" data-toggle="buttons">
+                        <a id="selectMap" class="searchBtn btn btn-primary active text-white">Map</a>
+                        <a id="selectTable" class="searchBtn btn btn-primary text-white">Table</a>
+                    </div>
+                </div>
+                <div id="locations" class="card-body p-0">
+                    <div id="map">
+                        <div id="searchLocations" class="input-group">
+                            <div id="geocoder"></div>
+                            <select class="custom-select" id="radius">
+                                <option value="100">100m</option>
+                                <option value="500">500m</option>
+                                <option value="1000">1km</option>
+                                <option value="5000" selected>5km</option>
+                            </select>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button" id="button-addon2">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="table" class="p-2">
+                        <!-- Results Table -->
+                        <table id="dataTable" class="display table" width="100%"></table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-12 col-lg-4 col-xl-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary">
+                    <h4 class=" mb-0 text-white">Filters</h4>
+                </div>
+                <div class="card-body">
+                    <!--Filter Year-->
+                    <label class="formLabel text-muted">Year</label>
+                    <select id="selectYear" class="custom-select mb-2">
+                        <option value=2018 selected>2018</option>
+                        <option value=2017>2017</option>
+                        <option value=2016>2016</option>
+                        <option value=2015>2015</option>
+                        <option value=2014>2014</option>
+                        <option value=2013>2013</option>
+                        <option value=2012>2012</option>
+                        <option value=2011>2011</option>
+                        <option value=2010>2010</option>
+                        <option value=2009>2009</option>
+                        <option value=2008>2008</option>
+                        <option value=2007>2007</option>
+                        <option value=2006>2006</option>
+                        <option value=2005>2005</option>
+                        <option value=2004>2004</option>
+                        <option value=2003>2003</option>
+                        <option value=2002>2002</option>
+                        <option value=2001>2001</option>
+                        <option value=2000>2000</option>
+                    </select>
+
+                    <!--Filter Road Type-->
+                    <label class="formLabel text-muted">Road Type</label>
+                    <select id="selectRoadType" class="custom-select mb-2">
+                        <option value='all' selected>All</option>
+                        <option value='Major'>Major</option>
+                        <option value='Minor'>Minor</option>
+                    </select>
+
+                    <!--Filter Travel Direction-->
+                    <label class="formLabel text-muted">Travel Direction</label>
+                    <select id="selectDirection" class="custom-select mb-2">
+                        <option value='N' selected>North</option>
+                        <option value='S'>South</option>
+                        <option value='E'>East</option>
+                        <option value='W'>West</option>
+                    </select>
+
+                    <!--Filter Estimation Method-->
+                    <label class="formLabel text-muted">Estimation Method</label>
+                    <select id="selectEstimationMethod" class="custom-select mb-3">
+                        <option value='all' selected>All</option>
+                        <option value='Counted'>Counted</option>
+                        <option value='Estimated'>Estimated</option>
+                    </select>
+
+                    <!--Reset Filters-->
+                    <div class="text-right">
+                        <a id="filterReset" type="button" class="btn btn-danger text-white">Reset</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-12 col-xl-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary">
+                    <h4 class=" mb-0 text-white">Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 col-lg-6 col-xl-12 mb-2">
+                            <img src="https://maps.googleapis.com/maps/api/streetview?size=600x300&location=50.71844418222463,-3.46219539642334&fov=80&heading=0.883&pitch=0&key={{googleApiKey}}
+                            " class="img-fluid" alt="">
+                        </div>
+                        <div class="col-12 col-lg-6 col-xl-12 mb-2">
+                            <div class="row">
+                                <!-- Feature Details -->
+                                <div class="col-12 ">
+                                    <label class="formLabel text-muted">Count Point Id</label>
+                                    <p class="td_region_name mb-1">123456</p>
+                                </div>
+                                <div class="col-12">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="formLabel text-muted">Region</label>
+                                            <p class="td_region_name mb-1">ABC</p>
+                                        </div>
+                                        <div class="col-6">
+
+                                            <label class="formLabel text-muted">Local Authority</label>
+                                            <p class="td_local_authority_name  mb-1">ABC</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+
+                                            <label class="formLabel text-muted">Road Name</label>
+                                            <p class="td_road_name  mb-1">ABC</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+
+                                        <div class="col-6">
+
+                                            <label class="formLabel text-muted">Road Type</label>
+                                            <p class="td_road_type  mb-1">ABC</p>
+
+                                        </div>
+
+                                        <div class="col-6">
+
+                                            <label class="formLabel text-muted">Road Category</label>
+                                            <p class="td_road_category  mb-1">ABC</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+
+                                            <label class="formLabel text-muted">Latitude</label>
+                                            <p class="td_latitude mb-1">123</p>
+
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="formLabel text-muted">Longitude</label>
+                                            <p class="td_longitude mb-1">123</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-12 col-lg-6 col-xl-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary">
+                    <h4 class=" mb-0 text-white">Non Commercial Vehicles</h4>
+                </div>
+                <div class="card-body">
+                    <div id="nonCommChart" class="chart"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-12 col-lg-6 col-xl-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary">
+                    <h4 class=" mb-0 text-white">HGVs</h4>
+                </div>
+                <div class="card-body">
+                    <div id="hgvChart" class="chart"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-12 col-lg-6 col-xl-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary">
+                    <h4 class=" mb-0 text-white">Breakdown by Year</h4>
+                </div>
+                <div class="card-body">
+                    <select id="selectYear" class="custom-select mb-2">
+                        <option value=2018>2018</option>
+                        <option value=2017>2017</option>
+                        <option value=2016>2016</option>
+                        <option value=2015>2015</option>
+                        <option value=2014>2014</option>
+                        <option value=2013>2013</option>
+                        <option value=2012>2012</option>
+                        <option value=2011>2011</option>
+                        <option value=2010>2010</option>
+                        <option value=2009>2009</option>
+                        <option value=2008>2008</option>
+                        <option value=2007>2007</option>
+                        <option value=2006>2006</option>
+                        <option value=2005>2005</option>
+                        <option value=2004>2004</option>
+                        <option value=2003>2003</option>
+                        <option value=2002>2002</option>
+                        <option value=2001>2001</option>
+                        <option value=2000 selected>2000</option>
+                    </select>
+                    <div id="byYearChart" class="chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{> info}}
+
+<nav class="navbar navbar-light bg-light">
+    <p class="gitLink text-center mb-1 w-100">
+        <small>View code on <a class="text-decoration-none" href="/">Github</a></small>
+    </p>
+</nav>
+
+
+
+{{#section 'script'}}
+
+
+
+    <script>
+
+        // Mapbox token
+        mapboxgl.accessToken = "{{mapboxToken}}";
+
+        // Create the Map
+        let map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+            center: [-3.70, 50.72], // starting position [lng, lat]
+            zoom: 8 // starting zoom
+        });
+
+        // Bounding Box (bbox) for Devon
+        let bbox = [
+            [-2.83, 51.25],
+            [-4.56, 50.18]
+        ];
+
+        // Set the map to the bbox
+        map.fitBounds(bbox, {
+            padding: 20 // Add some padding around bbox
+        });
+
+        // Add Navigation control
+        map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+        // Add Current Location control
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }), 'top-left');
+
+        // Add map Scale
+        map.addControl(new mapboxgl.ScaleControl({
+            maxWidth: 80,
+            unit: 'metric'
+        }), 'bottom-right');
+
+        let geocoder = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            placeholder: 'Search by Address',
+            types: 'country,region,place,postcode,locality,neighborhood',
+            bbox: [-4.56, 50.18, -2.83, 51.25]
+        });
+
+        geocoder.addTo('#geocoder');
+
+        $('#selectMap').click(function (e) {
+            $('.searchBtn').removeClass('active');
+            $('#map').show();
+            $('#table').hide();
+        })
+
+        $('#selectTable').click(function (e) {
+            $('.searchBtn').removeClass('active');
+            $('#map').hide();
+            $('#table').show();
+        })
+
+        // Setup the table
+        let table = $('#dataTable').DataTable({
+            columns: [
+                {
+                    title: 'Point ID',
+                    data: "count_point_id"
+                },
+                {
+                    title: 'Region',
+                    data: "region_name"
+                },
+                {
+                    title: 'Local Authority',
+                    data: "local_authority_name"
+                },
+                {
+                    title: 'Road Name',
+                    data: "road_name"
+                },
+                {
+                    title: 'Road Type',
+                    data: "road_type"
+                }
+            ],
+            "order": [[0, 'asc']] // Order by count_point_id
+        });
+
+        let nonCommChart = c3.generate({
+            bindto: d3.select('#nonCommChart'),
+            data: {
+                x: 'Year',
+                columns: [
+                    ['Year', 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013],
+                    ["Pedal Cycles", 10, 9, 10, 8, 8, 9, 8, 7, 7, 11, 11, 10, 9, 5],
+                    ["Two Wheeled Moto Vehicles", 52, 53, 54, 59, 66, 58, 57, 62, 65, 76, 69, 75, 70, 50],
+                    ["Cars & Taxis", 6451, 6728, 6869, 6958, 6965, 7007, 7007, 5976, 5785, 8217, 8102, 8053, 7989, 7837],
+                    ["Busses & Coaches", 30, 32, 37, 33, 28, 29, 31, 35, 37, 34, 35, 36, 37, 31]
+                ],
+            },
+            tooltip: {
+                format: {
+                    value: function (value, ratio, id, index) {
+                        return value; // use value instead of %
+                    }
+                }
+            },
+            size: {
+                height: 300 // set max height
+            },
+            axis: {
+                x: {
+                    tick: {
+                        show: false
+                    },
+                    type: 'category',
+                    categories: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013],
+                }
+            }
+        });
+
+        let hgvsChart = c3.generate({
+            bindto: d3.select('#hgvChart'),
+            data: {
+                columns: [
+                    ['Light Goods Vans', 1073, 1086, 1138, 1277, 1347, 1394, 1497, 1297, 1346, 1314, 1355, 1392, 1440, 1664],
+                    ['2 Rigid Axle', 252, 254, 264, 268, 278, 274, 268, 173, 170, 151, 158, 152, 150, 184],
+                    ['3 Rigid Axle', 52, 62, 70, 75, 82, 79, 75, 37, 41, 41, 41, 43, 46, 39],
+                    ['4 or more Rigid Axle', 14, 14, 16, 18, 20, 21, 22, 24, 25, 20, 17, 18, 20, 22],
+                    ['3 & 4 Articulated Axle', 42, 37, 35, 33, 32, 29, 27, 24, 21, 16, 18, 13, 10, 19],
+                    ['5 Articulated Axle', 79, 68, 61, 54, 48, 42, 40, 33, 30, 25, 23, 22, 21, 45],
+                    ['6 or more Articulated Axle', 67, 75, 85, 94, 104, 110, 126, 84, 84, 106, 102, 103, 104, 81]
+                ],
+            },
+            tooltip: {
+                format: {
+                    value: function (value, ratio, id, index) {
+                        return value; // use value instead of %
+                    }
+                }
+            },
+            size: {
+                height: 350 // set max height
+            },
+            axis: {
+                x: {
+                    tick: {
+                        show: false
+                    },
+                    type: 'category',
+                    categories: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013],
+                }
+            }
+        });
+
+        // Donut Chart using columns
+        let byYearChart = c3.generate({
+            bindto: d3.select('#byYearChart'),
+            data: {
+                columns: [
+                    ["Pedal Cycles", 10],
+                    ["Two Wheeled Moto Vehicles", 52],
+                    ["Cars & Taxis", 6451],
+                    ["Busses & Coaches", 30],
+                    ['Light Goods Vans', 1073],
+                    ['2 Rigid Axle', 252],
+                    ['3 Rigid Axle', 52],
+                    ['4 or more Rigid Axle', 14],
+                    ['3 & 4 Articulated Axle', 42],
+                    ['5 Articulated Axle', 79],
+                    ['6 or more Articulated Axle', 67]
+                ],
+                type: 'pie',
+            },
+            tooltip: {
+                format: {
+                    value: function (value, ratio, id, index) {
+                        return value; // use value instead of %
+                    }
+                }
+            },
+            size: {
+                height: 300 // set max height
+            }
+        });
+
+    </script>
+{{/section}}
