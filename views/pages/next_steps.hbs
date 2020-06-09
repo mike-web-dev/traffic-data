@@ -68,19 +68,56 @@
 <div class="container my-4">
     <div class="row mb-2">
         <div class="col">
-            <h2 class="font-weight-bold text-uppercase">The Dashboard</h2>
+            <h2 class="font-weight-bold text-uppercase">The Data</h2>
             <hr>
         </div>
     </div>
     <div class="row mb-4">
         <div class="col">
             <p>
-                Given more time it would be nice to have been able to flesh out the dashboard a bit more. At this point
-                it is little more than a wireframe. The UK Government <a href="https://data.gov.uk/">Open Data</a>
-                provides more than just traffic counts. In the case of traffic data, we could incorporate the number of
-                accidents. These data sets could be used to creat heatmaps and choropleth to provide additional
-                information
+                We know where to get the data and some of the tools we can use to display and interact with it but
+                what's next? We could continue to use the
+                <a href="https://roadtraffic-docs.dft.gov.uk/#api">Road Traffic Open Data API</a> but it would be far
+                better to store and manage the data ourselves.
             </p>
+            <p>Why?</p>
+            <p>
+                Storing the data ourselves allows us to manipulate and query the data in a more flexible way. Yes we
+                can do some of this client side but it would be far more efficient to do this server side or using a
+                database. Web pages would load faster and we can supplement the data with additional information such as
+                the <a href="/examples/heatmap">heatmap</a> and <a href="/examples/choropleth">choropleth</a> examples.
+            </p>
+            <div class="row py-4">
+                <div class="col-6 text-center">
+                    <img src="/img/postgres.png" height="100" alt="">
+                </div>
+                <div class="col-6 text-center">
+                    <img src="/img/postgis.png" height="100" alt="">
+                </div>
+            </div>
+            <p>
+                <a href="https://www.postgresql.org/">Postgres</a> with the <a href="https://postgis.net/">PostGIS</a>
+                Extension would also allow us to create and query geospatial information. This could be used to aid in:
+            </p>
+            <ul>
+                <li>Town and Country Planning</li>
+                <li>Infrastructure Planning & Maintenance</li>
+                <li>Identifying Trends in Traffic Flow</li>
+                <li>Route Planning</li>
+                <li>Accident Hotpots</li>
+                <li>Air Quality & Pollution Statistics</li>
+                <li>And many more...</li>
+            </ul>
+            <p>
+                I've created a mockup of a dashboard using some of the techniques and libraries shown in the
+                <a href="/examples">examples</a> pages <a href="/dashboard">here</a>. Its very basic and given more time
+                it would be nice to have bee able to get a working frontend example.
+            </p>
+            <div class="w-50 m-auto">
+                <a href="/dashboard">
+                    <img src="/img/dashboard.png" class="img-fluid shadow-sm my-4" alt="">
+                </a>
+            </div>
         </div>
     </div>
 
@@ -93,14 +130,12 @@
     <div class="row mb-4">
         <div class="col">
             <p>
-                For the purposes of development and testing we used static files rather than the
-                <a href="https://roadtraffic-docs.dft.gov.uk/#api">Road Traffic Open Data API</a>. In the future it
-                would be good to incorporate the api or create our own.
+                For the purposes of development and testing we mainly used static files rather than an API but in the
+                future it ideally we would incorporate an api or create our own.
             </p>
             <p>
-                <a href="https://www.postgresql.org/">Postgres</a> and <a href="https://postgis.net/">PostGIS</a> are
-                incredibly powerful tools and can be used to run a numerous Geospatial queries, which would tie in very
-                nicely with data.
+                Datasets can be huge and to save on resources and download times it would be beneficial to create and
+                API and query data based on a predefined set of parameters.
             </p>
         </div>
     </div>
@@ -118,11 +153,23 @@
                 <a href="https://getbootstrap.com/">Bootstrap 4</a> and as such is hardly the prettiest of web
                 applications. The next step after creating a Database and API would be to redesign the application.
             </p>
+
             <p>
-               The next logical step would be top create a Single Page App using
+                The next logical step would be top create a Single Page App using
                 <a href="https://reactjs.org/">React.js</a>, <a href="https://vuejs.org/">Vue.js</a> or
-                <a href="https://angular.io/">Angular</a>.
+                <a href="https://angular.io/">Angular</a>. An SPA would allow us to access and query complex data
+                without the need to refresh the page.
             </p>
+            <p>
+                Uber have already create a <a href="http://visgl.github.io/react-map-gl/">React version of MapboxGL</a>
+                and is part of their Visualization Framework Suite. <a href="https://deck.gl/#/">DECK.GL</a> is really
+                interesting and you should definitely take a look.
+            </p>
+            <div class="w-50 m-auto">
+                <a href="https://deck.gl/#/">
+                    <img src="/img/deck.png" class="img-fluid shadow-sm my-4" alt="">
+                </a>
+            </div>
         </div>
     </div>
 
@@ -141,7 +188,6 @@
         </div>
     </div>
 </div>
-
 
 <nav class="navbar navbar-light bg-light">
     <p class="gitLink text-center mb-1 w-100">

@@ -1,0 +1,174 @@
+<div class="mapContainer">
+    <div id="map" class="map"></div>
+    {{> info}}
+</div>
+
+{{#section 'script'}}
+
+        <script>
+
+        // Mapbox token
+        mapboxgl.accessToken = "{{mapboxToken}}";
+
+        // Create the Map
+        let map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/mapbox/outdoors-v11', // stylesheet location
+            center: [-3.70, 50.72], // starting position [lng, lat]
+            zoom: 8 // starting zoom
+        });
+
+        // Bounding Box (bbox) for Devon
+        let bbox = [
+            [-2.83, 51.25],
+            [-4.56, 50.18]
+        ];
+
+        // Set the map to the bbox
+        map.fitBounds(bbox, {
+            padding: 20 // Add some padding around bbox
+        });
+
+        // Add Navigation control
+        map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+        // Add Current Location control
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }), 'top-left');
+
+        // Add map Scale
+        map.addControl(new mapboxgl.ScaleControl({
+            maxWidth: 80,
+            unit: 'metric'
+        }), 'bottom-right');
+
+        // Create Popup
+        let popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            maxWidth: '350px'
+        });
+
+        // Close popup and reset layer paint properties
+        function closePopup() {
+            popup.remove();
+            map.setPaintProperty('points', 'circle-color', '#008cba');
+        }
+
+        // Map is Loaded
+        map.on('load', function () {
+
+            // Add layer from geojson
+            map.addSource('locations', {
+                'type': 'geojson',
+                'data': '/api/locations'
+            });
+
+            // Create Layer from Source
+            map.addLayer({
+                'id': 'points',
+                'source': 'locations',
+                'type': 'circle',
+                // set the style of the features
+                'paint': {
+                    'circle-radius': 5,
+                    'circle-color': '#008cba',
+                    'circle-stroke-color': '#fff',
+                    'circle-stroke-width': 2
+                }
+            });
+
+            // Change the cursor style as a UI indicator.
+            map.on('mouseenter', 'points', function (e) {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // Change the cursor style to default.
+            map.on('mouseleave', 'points', function () {
+                map.getCanvas().style.cursor = '';
+            });
+
+            // if no features selected close popup and reset layer paint properties
+            map.on('click', function () {
+                closePopup();
+            });
+
+            // Map Interaction - Click on Feature
+            map.on('click', 'points', function (e) {
+
+                // features exist
+                if (e.features.length > 0) {
+
+                    // select closest/first feature
+                    let selected = e.features[0];
+
+                    // Style selected feature
+                    map.setPaintProperty('points', 'circle-color', [
+                        'match',
+                        ['get', 'count_point_id'],
+                        selected.properties.count_point_id,
+                        '#fd7e14',
+                        /* other */ '#008cba'
+                    ]);
+
+                    // Create a Coordinates pair
+                    let coordinates = selected.geometry.coordinates.slice();
+
+                    // Ensure that if the map is zoomed out such that multiple
+                    // copies of the feature are visible, the popup appears
+                    // over the copy being pointed to.
+                    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                    }
+
+                    // Animate map to location
+                    map.easeTo({center: coordinates, zoom: 9});
+
+                    //Create the popup description
+                    let description = `
+                    <div id="customPopupDetails" class="card border-light mb-3">
+                        <div class="card-header bg-primary text-white border-0">
+                            Count Location ID - ` + selected.properties.count_point_id + `
+                            <a type="button" class="close" onclick="closePopup()">×</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="text-muted">Region</label>
+                                    <p>` + selected.properties.region_name + `</p>
+                                </div>
+                                <div class="col-6">
+                                    <label class="text-muted">Local Authority</label>
+                                    <p>` + selected.properties.local_authority_name + `</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="text-muted">Road Name</label>
+                                    <p>` + selected.properties.road_name + `</p>
+                                </div>
+                                <div class="col-6">
+                                    <label class="text-muted">Road Type</label>
+                                    <p>` + selected.properties.road_type + `</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                    // Add the Popup to the map
+                    popup
+                            .setLngLat(coordinates)
+                            .setHTML(description)
+                            .addTo(map);
+                }
+            });
+        });
+
+
+
+    </script>
+{{/section}}

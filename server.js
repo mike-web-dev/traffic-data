@@ -11,6 +11,7 @@ const helpers = require('./helpers')
 const indexRouter = require('./routes/index');
 const examplesRouter = require('./routes/examples');
 const dashboardRouter = require('./routes/dashboard');
+const apiRouter = require('./api/index');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/examples', examplesRouter);
 app.use('/dashboard', dashboardRouter);
+app.use('/api', apiRouter);
 
 
 // catch 404 and forward to error handler

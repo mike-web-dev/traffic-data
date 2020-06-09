@@ -1,8 +1,33 @@
 const express = require('express');
 const router = express.Router();
 
-/* GET examples page. */
+/* GET chart types page. */
 router.get('/', function (req, res, next) {
+    res.render('pages/examples/00_load_from_api', {
+        layout: 'layout',
+        title: 'Load Data From API',
+        url: req.url,
+        mapboxToken: process.env.MAPBOXTOKEN,
+        info: {
+            body: `
+                <p>
+                   It is possible to load the data directly from the <a href="https://roadtraffic.dft.gov.uk/api">
+                    roadtraffic.dft.gov.uk/api</a> however the data is pagenated and in order to display all the count 
+                    Points multiple requests need to be made. The resulting data was then converted on the server using 
+                    <a href="https://turfjs.org/">turf.js</a>. This can take a while to load...                
+                </p>
+                <p>
+                    Clicking on a feature will zoom to the location and a popup will show information about the point
+                </p>`,
+
+        },
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/00_load_from_api.hbs',
+        page: [{title: 'Examples', url: '/'}, {title: 'Load Data From API'}]
+    });
+});
+
+/* GET examples page. */
+router.get('/mapbox-layer', function (req, res, next) {
     res.render('pages/examples/01_mapbox_layer', {
         layout: 'example',
         title: 'Load data from a Mapbox',
@@ -11,10 +36,8 @@ router.get('/', function (req, res, next) {
         info: {
             body: `
                 <p>
-                    The Data for Devon was downloaded from <a href="https://roadtraffic.dft.gov.uk/api">
+                    The Count Point locations for Devon was downloaded from <a href="https://roadtraffic.dft.gov.uk/api">
                     roadtraffic.dft.gov.uk</a> and processed using <a href="https://www.qgis.org/en/site/">QGIS</a>. 
-                    The data contained multiple entries for the same location, this data was filtered to contain 
-                    locations/features with a unique Count Point ID.
                 </p>
                 <p>
                     It was then uploaded to <a href="https://www.mapbox.com/">mapbox</a> and converted into a 
@@ -22,7 +45,7 @@ router.get('/', function (req, res, next) {
                     to display points on the map. 
                 </p>
                 <p>
-                    Click on a feature to view details and zoom to the location
+                    Clicking on a feature will zoom to the location and a popup will show information about the point
                 </p>`,
 
         },
@@ -45,7 +68,8 @@ router.get('/geojson-layer', function (req, res, next) {
                     use the MapboxGL library ta asynchronously load the GeoJson file from an external source.
                 </p>
                 <p>
-                    Click on a feature to view details and zoom to the location
+                    Clicking on a feature will fly to the location and set the pitch and bearing based on the bearing 
+                    calculated in <a href="https://www.qgis.org/en/site/">QGIS</a>
                 </p>`
         },
         gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/02_geojson_layer.hbs',
@@ -63,16 +87,13 @@ router.get('/d3-load', function (req, res, next) {
         info: {
             body: `
                 <p>
-                    Because the original data contained multiple datasets for the same location, instead of displaying 
-                    all locations/features we can use the unique use the same data from the first 
-                    <a href="/examples">example</a> to filter data from an external CSV using the 
+                    Because the original data contained multiple datasets for the same location, instead of repeatedly 
+                    displaying the same location/feature we can use the location data to filter an external CSV using the 
                     <a href="https://d3js.org/">d3.js</a> library.  
                 </p>
                 <p>
-                    The data is displayed using <a href="https://datatables.net/">datatables</a>
-                </p>
-                <p>
-                    Click on a feature to view details and zoom to the location
+                    Click on a feature to open a popup and click view details to open a modal containing the associated 
+                    data displayed using <a href="https://datatables.net/">datatables</a>
                 </p>`,
 
         },
@@ -143,10 +164,10 @@ router.get('/get-street-view', function (req, res, next) {
                 <p>
                     Using the <a href="https://developers.google.com/maps/documentation/streetview/intro">Street View Static API</a>
                     it is possible to use the pre-calculated bearing and get an image of the location based on the 
-                    location and bearing of the Count Point
+                    location and bearing of the Count Point.
                 </p>
                 <p>
-                    Click on a feature to view an image of the location
+                    Click on a feature to view an image of the location.
                 </p>`,
         },
         gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/06_google_street_view.hbs',
@@ -180,9 +201,64 @@ router.get('/style-by-attribute', function (req, res, next) {
     });
 });
 
+
+/* GET chart types page. */
+router.get('/heatmap', function (req, res, next) {
+    res.render('pages/examples/08_mapbox_heatmap', {
+        layout: 'layout',
+        title: 'Chart Types',
+        url: req.url,
+        mapboxToken: process.env.MAPBOXTOKEN,
+        info: {
+            body: `
+                <p>
+                   The Road Traffic Accidents for 2018 where downloaded from 
+                   <a href="https://data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data">data.gov.uk</a>
+                   and the uploaded to <a href="https://www.mapbox.com/">mapbox</a> as a Vector Tileset. The data is 
+                   displayed as a heatmap.
+                </p>
+                <p>
+                    Zooming into the map will reveal circles styled by the number of casualties. Click on a circle to 
+                    view details about the accident.
+                </p>`,
+
+        },
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/08_mapbox_heatmap.hbs',
+        page: [{title: 'Examples', url: '/examples'}, {title: 'Chart Types'}]
+    });
+});
+
+/* GET chart types page. */
+router.get('/choropleth', function (req, res, next) {
+    res.render('pages/examples/09_d3_choropleth', {
+        layout: 'layout',
+        title: 'd3 Choropleth',
+        url: req.url,
+        mapboxToken: process.env.MAPBOXTOKEN,
+        info: {
+            body: `
+                <p>
+                    The polling districts for Devon where downloaded from 
+                    <a href="https://www.ordnancesurvey.co.uk/opendatadownload/products.html">OS OpenData</a> and using 
+                    QGIS the number of Road Traffic Accidents from 
+                    <a href="https://data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data">data.gov.uk</a>
+                    where calculated per district. 
+                </p>
+                <p>
+                    A map was created using the <a href="https://d3js.org/">d3.js</a> library. You can update the map by 
+                    selecting a category from the dropdown and hevoer over a location to view a popup 
+                </p>
+                `,
+
+        },
+        gitUrl: 'https://github.com/mike-web-dev/traffic-data/blob/master/views/pages/examples/09_d3_choropleth.hbs',
+        page: [{title: 'Examples', url: '/examples'}, {title: 'd3 Choropleth'}]
+    });
+});
+
 /* GET chart types page. */
 router.get('/chart-types', function (req, res, next) {
-    res.render('pages/examples/08_chart_types', {
+    res.render('pages/examples/10_chart_types', {
         layout: 'layout',
         title: 'Chart Types',
         url: req.url,
@@ -198,6 +274,9 @@ router.get('/chart-types', function (req, res, next) {
         page: [{title: 'Examples', url: '/examples'}, {title: 'Chart Types'}]
     });
 });
+
+
+
 
 
 module.exports = router;

@@ -1,0 +1,401 @@
+{{#section 'header'}}
+    <style>
+
+        body {
+            background-color: #ddd;
+        }
+
+        .title {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: auto;
+        }
+
+        .map {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: auto;
+        }
+
+        .legendTitle {
+            font-size: 0.6rem;
+        }
+
+        .colourRamp {
+            width: 200px;
+            height: 15px;
+            background: linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 165, 0) 50%, rgb(255, 0, 0) 100%);            border-bottom: 1px solid #585858;
+            border-left: 1px solid #585858;
+            border-right: 1px solid #585858;
+        }
+
+        .rampLabel {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .labelMin, .labelMax {
+            font-size: 0.7rem;
+        }
+
+        .scaleItems {
+            display: flex;
+            flex-direction: row;
+
+        }
+
+        .scaleItems.hidden {
+            display: none;
+        }
+
+        .colorItem {
+            width: 30px;
+            height: 15px;
+            background-color: #ddd;
+            border-bottom: 1px solid #383838;
+            border-right: 1px solid #383838;
+        }
+
+        .scaleItem:first-child .colorItem {
+            border-left: 1px solid #383838;
+        }
+
+        .colorLabel {
+            width: 30px;
+            text-align: center;
+            font-size: 0.7rem;
+            display: flex;
+            align-content: flex-end;
+            justify-content: center;
+        }
+
+
+        #selectType {
+            width: 200px;
+        }
+
+        #customPopupDetails {
+            position: fixed;
+            display: none;
+            z-index: 99;
+        }
+
+    </style>
+{{/section}}
+
+<div class="mapContainer">
+    <div id="map" class="map">
+        <div class="title">
+            <h1 class="font-weight-bold text-uppercase mt-2 mx-4 mb-0">Number of Traffic Accidents</h1>
+            <h4 class="text-muted text-uppercase mb-2 mx-4">Devon Polling Districts 2018</h4>
+
+            <!--Select the Data Set to style by-->
+            <select id="selectType" class="custom-select mb-2 mx-4">
+                <option value='accidents' selected>Total Accidents</option>
+                <option value='casualties'>Total Casualties</option>
+                <option value='c/a'>Casualties per Accidents</option>
+            </select>
+        </div>
+
+        <!--Legend-->
+        <div class="legend mb-2 mx-4">
+            <h5 class="mb-0">Legend</h5>
+            <label class="legendTitle text-muted text-uppercase mb-0" for="">Number of Accidents</label>
+            <hr class="mt-1 mb-2">
+
+            <div class="legendContainer">
+                <div class="ramp">
+                    <div class="colourRamp "></div>
+                    <div class="rampLabel">
+
+                        <div class="labelMin">
+                            0
+                        </div>
+
+                        <div class="labelMax">
+                            60000
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scaleItems hidden">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {{> info}}
+</div>
+
+<!--Popup-->
+<div id="customPopupDetails" class="card border-light mb-3">
+    <div class="card-header bg-primary text-white border-0">
+        <span class="popupName"></span>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6">
+                <label class="text-muted">Accidents</label>
+                <p class="popupAccidents"></p>
+            </div>
+            <div class="col-6">
+                <label class="text-muted">Casualties</label>
+                <p class="popupCasualties"></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <label class="text-muted">Casualties per Accidents</label>
+                <p class="popupCasualtiesAccidents"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{#section 'script'}}
+
+    <!-- D3.js -->
+    <script src="/js/d3/d3.v5.min.js"></script>
+
+    <!--
+    topojson.js
+    used to convert topojson to geojson
+    -->
+    <script src="/js/d3/topojson.js"></script>
+
+    <script>
+
+        let canvas = document.querySelector('.map');
+
+        let width = canvas.offsetWidth;
+        let height = canvas.offsetHeight;
+
+        // Container
+        const container = d3.select(canvas);
+
+        // The Map SVG
+        let map = container
+                .append('svg')
+                .attr("viewBox", [0, 0, width, height].join(' '));
+
+        let scale = width > height ? height * 9 * Math.PI : width * 7 * Math.PI;
+
+        // Crea a projection to draw the geojson with
+        let projection = d3.geoMercator()
+                .center([-3.8, 50.8])
+                .translate([width / 2, height / 2])
+                .scale(scale);
+
+        let path = d3.geoPath()
+                .projection(projection);
+
+        // Create the group to hold the layer
+        let county = map.append('g');
+
+
+        // Load Data
+        let promises = [
+            d3.json('/data/polling_district.json'),
+        ];
+
+        Promise.all(promises).then(ready);
+
+        async function ready([district]) {
+
+            // Convert to a geojson
+            let geojson = topojson.feature(district, district.objects.polling_district);
+
+            // Calculate the max number of of Accidents
+            let maxAccidents = d3.max(geojson.features, function (d) {
+                return parseInt(d.properties.accidents);
+            });
+
+            // Update the label
+            $('.labelMax').html(maxAccidents);
+
+
+            // Calculate the max number of of casualties
+            let maxCasualties = d3.max(geojson.features, function (d) {
+                return parseInt(d.properties.casualties);
+            });
+
+            // Calculate the max number of of casualties per accident and round value up
+            let maxCasualtiesAccidents = d3.format('.1r')(d3.max(geojson.features, function (d) {
+                return parseInt(d.properties.casualties) / parseInt(d.properties.accidents);
+            }));
+
+            // create color ranges
+            let rangeCasualties = d3.scaleLinear()
+                    .domain([0, maxCasualties/2, maxCasualties])
+                    .range(['#fff', 'orange', 'red']);
+
+            let rangeAccidents = d3.scaleLinear()
+                    .domain([0, maxAccidents/2, maxAccidents])
+                    .range(['#fff', 'orange', 'red']);
+
+            let rangeCasualtiesAccidents = d3.scaleLinear()
+                    .domain([0, maxCasualtiesAccidents/2, maxCasualtiesAccidents])
+                    .range(['#fff', 'orange', 'red']);
+
+            // Create legend
+            for (let i = 0; i <= maxCasualtiesAccidents; i++) {
+                $('.scaleItems').append(`
+                    <div class="scaleItem">
+                        <div class="colorItem" style="background-color:` + rangeCasualtiesAccidents(i) + `"></div>
+                        <div class="colorLabel">` + i + `</div>
+                    </div>
+                `);
+            }
+
+            // Draw the geojson
+            county.selectAll('path')
+                    .data(geojson.features)
+                    .enter()
+                    .append('path')
+                    .attr('d', path)
+                    .attr('fill', function (d) { // Style by attribute
+                        let accidents = parseInt(d.properties.accidents);
+                        if (accidents) {
+                            return rangeAccidents(parseInt(d.properties.accidents));
+                        }
+                        return rangeAccidents(0);
+                    })
+                    .attr('stroke', '#ddd')
+                    .attr('stroke-width', 0.3)
+                    .attr('stroke-linejoin', 'round')
+                    .on('mouseover', function (d) {
+                        container.style('cursor', 'pointer'); // change cursor on hover
+                        d3.select(this)
+                                .attr('stroke-width', 1)
+                                .attr('stroke', '#aaa');
+
+                        d3.select('#customPopupDetails') // Anad and update the popup
+                                .style('display', 'flex')
+                                .style('left', d3.event.pageX + 10 + 'px')
+                                .style('top', d3.event.pageY - 150 + 'px')
+
+                        $('.popupName').html(d.properties.Distric_Bo);
+                        $('.popupAccidents').html(d.properties.accidents);
+                        $('.popupCasualties').html(d.properties.casualties);
+                        if(parseInt(d.properties.accidents)> 0){
+                            let casualtiesPerAccident = (parseInt(d.properties.casualties)/parseInt(d.properties.accidents)).toFixed(1);
+                            $('.popupCasualtiesAccidents').html( casualtiesPerAccident );
+                        } else {
+                            $('.popupCasualtiesAccidents').html(0);
+                        }
+                    })
+                    .on('mouseout', function (d) { // Reset and remove popup
+                        container.style('cursor', 'default')
+                        d3.select(this).attr('stroke-width', 0.3);
+                        d3.select('#customPopupDetails')
+                                .style('display', 'none');
+                    });
+
+
+            let countType = 'accidents';
+
+            // update style on change
+            $('#selectType').on('change', function () {
+
+                countType = $('#selectType').val();
+
+                if (countType === 'accidents') {
+
+                    // Show/hide appropriate legend
+                    $('.scaleItems').addClass('hidden');
+                    $('.ramp').show();
+
+                    // Update legend/labels
+                    $('.legendTitle').html('Accidents')
+                    $('.labelMax').html(maxAccidents)
+
+                    $('.colourRamp').css('background', 'linear-gradient(90deg, '+rangeAccidents(0)+' 0%,  '+rangeAccidents(maxAccidents/2)+' 50%, '+rangeAccidents(maxAccidents)+' 100%)')
+
+                    // Update style
+                    county.selectAll('path')
+                            .attr('fill', function (d) {
+                                let accidents = parseInt(d.properties.accidents);
+                                if (accidents) {
+                                    return rangeAccidents(accidents);
+                                }
+                                return rangeAccidents(0);
+                            });
+
+                } else if(countType === 'casualties') {
+
+                    // Show/hide appropriate legend
+                    $('.scaleItems').addClass('hidden');
+                    $('.ramp').show();
+
+                    // Update legend/labels
+                    $('.legendTitle').html('Casualties');
+                    $('.labelMax').html(maxCasualties);
+                    $('.colourRamp').css('background', 'linear-gradient(90deg, '+rangeCasualties(0)+' 0%,  '+rangeCasualties(maxCasualties/2)+' 50%, '+rangeCasualties(maxCasualties)+' 100%)');
+
+                    // Update style
+                    county.selectAll('path')
+
+                            .attr('fill', function (d) {
+                                let casualties = parseInt(d.properties.casualties);
+                                if (casualties) {
+                                    return rangeCasualties(casualties);
+                                }
+                                return rangeAccidents(0);
+                            });
+
+                } else {
+                    // Show/hide appropriate legend
+                    $('.scaleItems').removeClass('hidden');
+                    $('.ramp').hide();
+
+                    // Update legend/labels
+                    $('.legendTitle').html('Casualties per Accident');
+
+                    // Update style
+                    county.selectAll('path')
+                            .attr('fill', function (d) {
+                                let casualtiesAccidents = parseInt(d.properties.casualties) / parseInt(d.properties.accidents);
+                                if (casualtiesAccidents) {
+                                    return rangeCasualtiesAccidents(casualtiesAccidents);
+                                }
+                                return rangeCasualtiesAccidents(0);
+                            });
+                }
+            })
+        }
+
+        // rescale map on viewport change
+        window.addEventListener('resize', function () {
+
+            width = canvas.offsetWidth;
+            height = canvas.offsetHeight;
+
+            scale = width > height ? height * 9 * Math.PI : width * 7 * Math.PI;
+
+            projection = d3.geoMercator()
+                    .center([-3.8, 50.8])
+                    .translate([width / 2, height / 2])
+                    .scale(scale);
+
+            path = d3.geoPath()
+                    .projection(projection);
+
+            county.selectAll('path')
+                    .attr('d', path);
+
+            map.attr("viewBox", [0, 0, width, height].join(' '));
+
+        });
+
+
+    </script>
+{{/section}}

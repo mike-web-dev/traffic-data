@@ -29,7 +29,7 @@
         // Create the Map
         let map = new mapboxgl.Map({
             container: 'map', // container id
-            style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+            style: 'mapbox://styles/mapbox/dark-v10', // stylesheet location
             center: [-3.70, 50.72], // starting position [lng, lat]
             zoom: 8 // starting zoom
         });
@@ -124,7 +124,7 @@
                                 .attr("fill", "#008cba") // style feature
                                 .attr("fill-opacity", 1)
                                 .attr("stroke", "#fff")
-                                .attr("stroke-width", 0.5)
+                                .attr("stroke-width", 1)
                                 .attr("r", 10)
                                 .on('mouseover', function (d) {
                                     // Change the cursor style as a UI indicator.

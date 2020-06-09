@@ -1,5 +1,5 @@
 {
-  "name": "Traffic Data Visualistion",
+  "name": "Traffic-Data-Visualistion",
   "version": "1.0.0",
   "description": "An experiment using Road Traffic Open Data, mapbox & D3.js",
   "main": "server.js",
@@ -29,6 +29,7 @@
   "license": "MIT",
   "dependencies": {
     "@turf/turf": "^5.1.6",
+    "axios": "^0.19.2",
     "bootstrap": "^4.5.0",
     "cookie-parser": "~1.4.4",
     "d3": "^5.16.0",
